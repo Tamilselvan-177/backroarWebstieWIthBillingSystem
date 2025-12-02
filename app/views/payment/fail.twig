@@ -1,0 +1,14 @@
+{% extends "base.twig" %}
+
+{% block title %}Payment Failed{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-12">
+    <div class="bg-white rounded shadow p-8 text-center">
+        <h1 class="text-2xl font-bold mb-4">Payment Failed</h1>
+        <p class="mb-6">We could not verify your payment. No amount is charged.</p>
+        <a href="{{ app_url }}/checkout" class="bg-black text-white px-4 py-2 rounded">Back to Checkout</a>
+    </div>
+    </section>
+{% endblock %}
+

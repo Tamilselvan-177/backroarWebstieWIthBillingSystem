@@ -1,0 +1,372 @@
+{% extends 'base.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-10 bg-[var(--body-bg)]">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl md:text-4xl font-bold mb-8 text-[var(--brand-heading)]">Checkout</h1>
+
+        {% if session.flash.error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {{ session.flash.error }}
+        </div>
+        {% endif %}
+
+        {% if session.flash.success %}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            {{ session.flash.success }}
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Checkout Form -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Delivery Address -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-6 text-[var(--brand-text)]">Delivery Address</h2>
+
+                    <!-- Existing Addresses -->
+                    {% if addresses|length > 0 %}
+                        <div class="space-y-4 mb-6">
+                            {% for address in addresses %}
+                            <label class="block p-4 border-2 rounded-lg cursor-pointer hover:border-[var(--brand-primary)] transition-colors {% if default_address and address.id == default_address.id %}border-[var(--brand-primary)] bg-blue-50{% else %}border-[var(--card-border)]{% endif %}">
+                                <input type="radio" name="address_id" value="{{ address.id }}" class="mr-3" {% if default_address and address.id == default_address.id %}checked{% endif %} form="checkoutForm" required>
+                                <div class="inline-block align-top">
+                                    <p class="font-semibold text-[var(--brand-text)]">{{ address.full_name }}</p>
+                                    <p class="text-sm text-gray-600 mt-1">{{ address.address_line1 }}{% if address.address_line2 %}, {{ address.address_line2 }}{% endif %}</p>
+                                    <p class="text-sm text-gray-600">{{ address.city }}, {{ address.state }} - {{ address.pincode }}</p>
+                                    <p class="text-sm text-gray-600">Phone: {{ address.phone }}</p>
+                                    {% if address.is_default %}
+                                    <span class="inline-block mt-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Default</span>
+                                    {% endif %}
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-600 mb-4">No saved addresses. Please add a new address.</p>
+                    {% endif %}
+
+                    <!-- Add New Address Button -->
+                    <button type="button" onclick="document.getElementById('addAddressForm').classList.toggle('hidden')" class="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)] font-semibold">
+                        + Add New Address
+                    </button>
+
+                    <!-- Add Address Form (Separate from checkout form) -->
+                    <div id="addAddressForm" class="mt-6 p-4 bg-[var(--card-bg-alt)] rounded-lg {% if not errors %}hidden{% endif %}">
+                        <h3 class="font-semibold mb-4 text-[var(--brand-text)]">New Delivery Address</h3>
+                        <form id="addAddressFormElement" class="space-y-4">
+                            <input type="hidden" name="_token" value="{{ csrf_token }}">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Full Name *</label>
+                                    <input type="text" name="full_name" id="addr_full_name" value="{{ old.full_name }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" required>
+                                    {% if errors.full_name %}<p class="text-red-600 text-sm mt-1">{{ errors.full_name }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Phone *</label>
+                                    <input type="tel" name="phone" id="addr_phone" value="{{ old.phone }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" required>
+                                    {% if errors.phone %}<p class="text-red-600 text-sm mt-1">{{ errors.phone }}</p>{% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Address Line 1 *</label>
+                                <input type="text" name="address_line1" id="addr_line1" value="{{ old.address_line1 }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" required>
+                                {% if errors.address_line1 %}<p class="text-red-600 text-sm mt-1">{{ errors.address_line1 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Address Line 2</label>
+                                <input type="text" name="address_line2" id="addr_line2" value="{{ old.address_line2 }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">City *</label>
+                                    <input type="text" name="city" id="addr_city" value="{{ old.city }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" required>
+                                    {% if errors.city %}<p class="text-red-600 text-sm mt-1">{{ errors.city }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">State *</label>
+                                    <input type="text" name="state" id="addr_state" value="{{ old.state }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" required>
+                                    {% if errors.state %}<p class="text-red-600 text-sm mt-1">{{ errors.state }}</p>{% endif %}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Pincode *</label>
+                                    <input type="text" name="pincode" id="addr_pincode" value="{{ old.pincode }}" class="w-full px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]" required>
+                                    {% if errors.pincode %}<p class="text-red-600 text-sm mt-1">{{ errors.pincode }}</p>{% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="is_default" id="addr_is_default" class="mr-2">
+                                    <span class="text-sm">Set as default address</span>
+                                </label>
+                            </div>
+                            <div>
+                                <button type="button" id="saveAddressBtn" class="px-6 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary-hover)] font-semibold">
+                                    Save Address
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-6 text-[var(--brand-text)]">Payment Method</h2>
+                    <div class="space-y-4">
+                        <label class="block p-4 border-2 border-[var(--brand-primary)] bg-blue-50 rounded-lg">
+                            <input type="radio" name="payment_method" value="COD" class="mr-3" checked form="checkoutForm">
+                            <span class="font-semibold">Cash on Delivery (COD)</span>
+                            <p class="text-sm text-gray-600 ml-6 mt-1">Pay when you receive your order</p>
+                        </label>
+                        {% if razorpay_enabled %}
+                        <label class="block p-4 border-2 border-[var(--card-border)] rounded-lg hover:border-[var(--brand-primary)] transition-colors">
+                            <input type="radio" name="payment_method" value="RAZORPAY" class="mr-3" form="checkoutForm">
+                            <span class="font-semibold">Online Payment (UPI / Cards / Netbanking)</span>
+                            <p class="text-sm text-gray-600 ml-6 mt-1">Secure payment powered by Razorpay</p>
+                        </label>
+                        {% else %}
+                        <div class="p-4 border-2 border-dashed border-yellow-400 rounded-lg bg-yellow-50 text-sm text-yellow-900">
+                            Online payments are temporarily unavailable. Please use Cash on Delivery.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary (Right Sidebar) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow p-6 sticky top-20">
+                    <h2 class="text-xl font-bold mb-6 text-[var(--brand-text)]">Order Summary</h2>
+
+                    <!-- Cart Items -->
+                    <div class="space-y-3 mb-6 max-h-64 overflow-y-auto">
+                        {% for item in cart_items %}
+                        <div class="flex gap-3">
+                            <div class="w-16 h-16 bg-[var(--card-bg-alt)] rounded overflow-hidden flex-shrink-0">
+                                {% if item.image_path %}
+<img src="{{ item.image_path }}" alt="{{ item.product_name }}" class="w-full h-full object-contain">
+                                {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-2xl">📦</div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-[var(--brand-text)] truncate">{{ item.product_name }}</p>
+                                <p class="text-xs text-gray-500">Qty: {{ item.quantity }}</p>
+                                {% set item_price = item.sale_price ? item.sale_price : item.price %}
+                                <p class="text-sm font-bold">₹{{ (item_price * item.quantity)|number_format(2) }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="border-t border-[var(--card-border)] pt-4 space-y-3">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal</span>
+                            <span class="font-semibold">₹{{ totals.subtotal|number_format(2) }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Shipping</span>
+                            {% if totals.shipping == 0 %}
+                            <span class="font-semibold text-green-600">FREE</span>
+                            {% else %}
+                            <span class="font-semibold">₹{{ totals.shipping|number_format(2) }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="border-t border-[var(--card-border)] pt-3">
+                            <div class="flex justify-between text-lg font-bold text-[var(--brand-text)]">
+                                <span>Total</span>
+                                <span>₹{{ totals.total|number_format(2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Form (Separate, Clean Form) -->
+                    {% if addresses|length > 0 %}
+                    <form method="POST" action="{{ app_url }}/checkout/place-order" id="checkoutForm">
+                        <input type="hidden" name="_token" value="{{ csrf_token }}">
+                        <button type="submit" id="placeOrderBtn" class="w-full mt-6 px-6 py-3 bg-[var(--brand-primary)] text-white bg-black rounded-lg font-bold hover:bg-[var(--brand-primary-hover)] transition-colors">
+                            Place Order
+                        </button>
+                    </form>
+                    {% else %}
+                    <p class="text-sm text-gray-600 text-center mt-6">Please add a delivery address to continue</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{% if razorpay_enabled %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = '{{ csrf_token }}';
+    const appUrl = '{{ app_url|e("js") }}';
+    const razorpayEnabled = {{ razorpay_enabled ? 'true' : 'false' }};
+    const saveBtn = document.getElementById('saveAddressBtn');
+    const checkoutForm = document.getElementById('checkoutForm');
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const defaultBtnText = placeOrderBtn ? placeOrderBtn.textContent : '';
+    const customerData = {
+        name: '{{ customer.name|default(session.user_name)|e("js") }}',
+        email: '{{ customer.email|default(session.user_email)|e("js") }}',
+        contact: '{{ customer.phone|default('')|e("js") }}'
+    };
+
+    function toggleButtonLoading(isLoading, label) {
+        if (!placeOrderBtn) return;
+        placeOrderBtn.disabled = isLoading;
+        placeOrderBtn.textContent = isLoading ? (label || 'Processing...') : defaultBtnText;
+    }
+
+    function getSelectedAddress() {
+        const selected = document.querySelector('input[name="address_id"]:checked');
+        return selected ? selected.value : null;
+    }
+
+    function submitVerificationForm(response, orderNumber) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = appUrl + '/payment/razorpay/verify';
+        const fields = {
+            '_token': csrfToken,
+            'order_number': orderNumber,
+            'razorpay_payment_id': response.razorpay_payment_id,
+            'razorpay_order_id': response.razorpay_order_id,
+            'razorpay_signature': response.razorpay_signature
+        };
+        Object.keys(fields).forEach(function(key) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = fields[key];
+            form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    async function startRazorpayFlow(addressId) {
+        if (!razorpayEnabled) {
+            alert('Online payments are currently unavailable.');
+            return;
+        }
+        if (typeof Razorpay === 'undefined') {
+            alert('Payment SDK failed to load. Please refresh and try again.');
+            return;
+        }
+        toggleButtonLoading(true, 'Initializing...');
+        const payload = new URLSearchParams();
+        payload.append('address_id', addressId);
+        payload.append('_token', csrfToken);
+
+        try {
+            const response = await fetch(appUrl + '/payment/razorpay/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: payload.toString()
+            });
+            const data = await response.json();
+            if (!data.success) {
+                toggleButtonLoading(false);
+                alert(data.message || 'Unable to start payment. Please try again.');
+                return;
+            }
+
+            const options = {
+                key: data.key_id,
+                amount: data.amount,
+                currency: data.currency,
+                name: 'BlackRoar',
+                description: 'Order #' + data.order_number,
+                order_id: data.razorpay_order_id,
+                prefill: {
+                    name: customerData.name || '',
+                    email: customerData.email || '',
+                    contact: customerData.contact || ''
+                },
+                notes: {
+                    order_number: data.order_number
+                },
+                theme: {
+                    color: '#1A1A1A'
+                },
+                handler: function (paymentResponse) {
+                    toggleButtonLoading(true, 'Verifying...');
+                    submitVerificationForm(paymentResponse, data.order_number);
+                },
+                modal: {
+                    ondismiss: function () {
+                        toggleButtonLoading(false);
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (rzpError) {
+                toggleButtonLoading(false);
+                alert(rzpError.error && rzpError.error.description ? rzpError.error.description : 'Payment failed. Please try again.');
+            });
+            rzp.open();
+        } catch (error) {
+            console.error('Payment init failed', error);
+            toggleButtonLoading(false);
+            alert('Something went wrong while connecting to payment gateway.');
+        }
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function() {
+            const payload = new URLSearchParams();
+            payload.append('full_name', document.getElementById('addr_full_name').value || '');
+            payload.append('phone', document.getElementById('addr_phone').value || '');
+            payload.append('address_line1', document.getElementById('addr_line1').value || '');
+            payload.append('address_line2', document.getElementById('addr_line2').value || '');
+            payload.append('city', document.getElementById('addr_city').value || '');
+            payload.append('state', document.getElementById('addr_state').value || '');
+            payload.append('pincode', document.getElementById('addr_pincode').value || '');
+            payload.append('is_default', document.getElementById('addr_is_default').checked ? 1 : 0);
+            payload.append('_token', csrfToken);
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            fetch(appUrl + '/checkout/address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: payload.toString()
+            }).then(function() {
+                window.location.reload();
+            }).catch(function(err) {
+                console.error('Address save failed', err);
+                window.location.reload();
+            });
+        });
+    }
+
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function(e) {
+            const addressId = getSelectedAddress();
+            if (!addressId) {
+                e.preventDefault();
+                alert('Please select a delivery address.');
+                return;
+            }
+            const paymentMethodEl = document.querySelector('input[name="payment_method"]:checked');
+            const paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'COD';
+            if (paymentMethod === 'RAZORPAY') {
+                e.preventDefault();
+                startRazorpayFlow(addressId);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

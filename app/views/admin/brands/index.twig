@@ -1,0 +1,129 @@
+{% extends "base.twig" %}
+
+{% block title %}Brands — Admin{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes adminFadeUp {
+        from { opacity:0; transform: translateY(20px); }
+        to   { opacity:1; transform: translateY(0); }
+    }
+    .admin-shell {
+        background: radial-gradient(circle at top, #f9fafb 0%, #e5e7eb 40%, #f3f4f6 100%);
+        min-height: calc(100vh - 64px);
+    }
+    .admin-panel {
+        animation: adminFadeUp .4s ease-out;
+    }
+    .admin-card {
+        background:#ffffff;
+        border-radius:1.1rem;
+        box-shadow:0 18px 40px rgba(15,23,42,0.12),0 0 0 1px rgba(148,163,184,0.25);
+        border:1px solid rgba(148,163,184,0.5);
+    }
+    .admin-pill {
+        font-size:.7rem;
+        text-transform:uppercase;
+        letter-spacing:.18em;
+        color:#6b7280;
+    }
+    .btn-xs{
+        font-size:11px;
+        padding:0.3rem 0.6rem;
+        border-radius:999px;
+        font-weight:600;
+        display:inline-flex;
+        align-items:center;
+        gap:0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-shell py-8">
+    <div class="container mx-auto px-4 admin-panel">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <a href="{{ app_url }}/admin"
+                   class="px-3 py-1 rounded-full border border-[var(--card-border)] text-[11px] font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)]">
+                    ← Dashboard
+                </a>
+            <div>
+                <p class="admin-pill mb-1">Admin / Brands</p>
+                <h1 class="text-2xl md:text-3xl font-black tracking-[0.14em] uppercase text-[var(--brand-heading)]">
+                    Brands
+                </h1>
+            </div>
+            </div>
+            <a href="{{ app_url }}/admin/brands/create"
+               class="px-4 py-2 rounded-full bg-[var(--brand-navbar)] text-white text-xs md:text-sm font-semibold hover:bg-black shadow">
+                + Add Brand
+            </a>
+        </div>
+
+        {% if session.flash.success %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-sm text-green-700">
+            {{ session.flash.success }}
+        </div>
+        {% endif %}
+        {% if session.flash.error %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+            {{ session.flash.error }}
+        </div>
+        {% endif %}
+
+        <div class="admin-card overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Name</th>
+                        <th class="p-3">Slug</th>
+                        <th class="p-3">Order</th>
+                        <th class="p-3">Active</th>
+                        <th class="p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for b in brands %}
+                    <tr class="border-t border-[var(--card-border)] bg-white hover:bg-gray-50">
+                        <td class="p-3 align-top text-xs">{{ b.id }}</td>
+                        <td class="p-3 align-top text-sm font-semibold text-[var(--brand-text)]">{{ b.name }}</td>
+                        <td class="p-3 align-top text-xs text-gray-600 break-all">{{ b.slug }}</td>
+                        <td class="p-3 align-top text-xs">{{ b.display_order }}</td>
+                        <td class="p-3 align-top text-xs">
+                            {% if b.is_active %}
+                                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold">Yes</span>
+                            {% else %}
+                                <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-semibold">No</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3 align-top">
+                            <div class="flex flex-wrap gap-1">
+                                <a href="{{ app_url }}/admin/brands/{{ b.id }}/edit"
+                                   class="btn-xs bg-gray-900 text-white">
+                                    ✏ Edit
+                                </a>
+                                <form action="{{ app_url }}/admin/brands/{{ b.id }}/delete"
+                                      method="post"
+                                      class="inline"
+                                      onsubmit="return confirm('Delete brand?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token }}">
+                                    <button class="btn-xs bg-red-600 text-white">
+                                        🗑 Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-gray-600 text-sm">No brands</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-10 bg-[var(--body-bg)]">
+    <div class="container mx-auto px-4 max-w-3xl">
+        <div class="bg-white rounded-lg shadow p-8 text-center">
+            <!-- Success Icon -->
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <h1 class="text-3xl font-bold text-[var(--brand-heading)] mb-2">Order Placed Successfully!</h1>
+            <p class="text-gray-600 mb-6">Thank you for your order. We'll send you a confirmation email shortly.</p>
+
+            <!-- Order Details -->
+            <div class="bg-[var(--card-bg-alt)] rounded-lg p-6 mb-6 text-left">
+                <h2 class="text-xl font-bold mb-4 text-[var(--brand-text)]">Order Details</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order Number:</span>
+                        <span class="font-semibold">{{ order.order_number }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order Date:</span>
+                        <span class="font-semibold">{{ order.created_at|date('d M Y, h:i A') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Amount:</span>
+                        <span class="font-bold text-lg text-[var(--brand-primary)]">₹{{ order.total_amount|number_format(2) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment Method:</span>
+                        <span class="font-semibold">{{ order.payment_method }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="bg-[var(--card-bg-alt)] rounded-lg p-6 mb-6 text-left">
+                <h3 class="font-bold mb-3 text-[var(--brand-text)]">Delivery Address</h3>
+                <p class="text-gray-700">{{ order.shipping_name }}</p>
+                <p class="text-gray-600 text-sm">{{ order.shipping_address }}</p>
+                <p class="text-gray-600 text-sm">{{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}</p>
+                <p class="text-gray-600 text-sm">Phone: {{ order.shipping_phone }}</p>
+            </div>
+
+            <!-- Order Items -->
+            <div class="bg-[var(--card-bg-alt)] rounded-lg p-6 mb-6 text-left">
+                <h3 class="font-bold mb-3 text-[var(--brand-text)]">Order Items</h3>
+                <div class="space-y-3">
+                    {% for item in order_items %}
+                    <div class="flex gap-3">
+                        <div class="w-16 h-16 bg-white rounded overflow-hidden flex-shrink-0">
+                            {% if item.image_path %}
+<img src="{{ item.image_path }}" alt="{{ item.product_name }}" class="w-full h-full object-contain">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-2xl">📦</div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm">{{ item.product_name }}</p>
+                            <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × ₹{{ item.price|number_format(2) }}</p>
+                            <p class="text-sm font-bold mt-1">₹{{ item.subtotal|number_format(2) }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ app_url }}/order/{{ order.order_number }}" class="px-6 py-3 bg-[var(--brand-primary)] text-white rounded-lg font-semibold hover:bg-[var(--brand-primary-hover)] transition-colors">
+                    View Order Details
+                </a>
+                <a href="{{ app_url }}/products" class="px-6 py-3 border border-[var(--card-border)] rounded-lg font-semibold hover:bg-[var(--card-bg-alt)] transition-colors">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

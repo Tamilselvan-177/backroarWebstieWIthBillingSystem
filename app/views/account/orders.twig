@@ -1,0 +1,45 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-14 bg-[var(--brand-light)] min-h-screen">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-8 text-[var(--brand-heading)]">My Orders</h1>
+
+        {% if session.flash.success %}
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                {{ session.flash.success }}
+            </div>
+        {% endif %}
+
+        {% if orders is empty %}
+            <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+                <p class="text-gray-600">You have no orders yet. <a href="{{ app_url }}/products" class="link-accent">Start shopping</a></p>
+            </div>
+        {% else %}
+            <div class="grid gap-6">
+                {% for order in orders %}
+                    <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <h3 class="font-semibold">Order #{{ order.id }}</h3>
+                                <p class="text-sm text-gray-500">Placed on {{ order.created_at }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-lg">{{ order.total | number_format(2, '.', ',') }} </p>
+                                <p class="text-sm text-gray-500">Status: {{ order.status }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{{ app_url }}/orders/{{ order.id }}" class="btn btn-secondary">View details</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

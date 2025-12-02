@@ -1,0 +1,345 @@
+{% extends "base.twig" %}
+
+{% block title %}BlackRoar — Mobile Cases & Accessories{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+    }
+
+    /* Hero Section */
+    .hero-section {
+        animation: scaleIn 0.8s ease-out;
+    }
+
+    /* Category Cards */
+    .category-card {
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 2px solid #e5e7eb;
+    }
+
+    .category-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border-color: #1A1A1A;
+    }
+
+    .category-card img {
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .category-card:hover img {
+        transform: scale(1.15) rotate(2deg);
+    }
+
+    .category-label {
+        background: linear-gradient(135deg, #1A1A1A 0%, #2d2d2d 100%);
+        transition: all 0.3s ease;
+    }
+
+    .category-card:hover .category-label {
+        background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%);
+    }
+
+    /* Featured Products */
+    .product-card {
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid #e5e7eb;
+    }
+
+    .product-card:hover {
+        transform: translateY(-12px) scale(1.03);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border-color: #1A1A1A;
+    }
+
+    .product-card img {
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .product-card:hover img {
+        transform: scale(1.15);
+    }
+
+    .bestseller-badge {
+        background: linear-gradient(135deg, #1A1A1A 0%, #2d2d2d 100%);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .view-btn {
+        transition: all 0.3s ease;
+        font-weight: 700;
+    }
+
+    .view-btn:hover {
+        transform: scale(1.1);
+        text-decoration: underline;
+    }
+
+    /* Benefits Section */
+    .benefit-card {
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid #e5e7eb;
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: #1A1A1A;
+    }
+
+    .benefit-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .benefit-card:hover .benefit-icon {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .section-title {
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #1A1A1A, transparent);
+    }
+
+    .category-title-decorated {
+        position: relative;
+        display: inline-block;
+        background: linear-gradient(135deg, #1A1A1A 0%, #2d2d2d 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .category-title-decorated::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #1A1A1A, transparent);
+        animation: shimmer 3s ease-in-out infinite;
+        background-size: 200% auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero -->
+    <section id="home" class="hero-section py-0">
+        <img src="{{ app_url }}/images/hero-banner.png" alt="BlackRoar Hero" class="w-full h-auto md:w-[1891px] md:h-[824px] object-contain md:object-cover mx-auto max-h-[60vh] md:max-h-[824px]" />
+    </section>
+
+    <!-- Collections / Categories -->
+    <section id="collections" class="py-14 bg-white scroll-mt-16 md:scroll-mt-24">
+        <div class="container mx-auto px-4">
+            <h2 class="section-title text-3xl md:text-5xl font-black text-center mb-16 uppercase tracking-wide">
+                Shop by Categories
+            </h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                <a href="{{ app_url }}/category/mobile-backcases" class="category-card block overflow-hidden rounded-2xl shadow-xl flex flex-col">
+                    <div class="aspect-square bg-gradient-to-b from-blue-50 to-white flex-1 flex items-center justify-center overflow-hidden">
+                        <img src="{{ app_url }}/images/categories/backcase.png" alt="Mobile Backcases" class="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    <div class="category-label text-white text-center font-black uppercase py-4 text-lg tracking-wider flex-none">
+                        Mobile Backcases
+                    </div>
+                </a>
+                <a href="{{ app_url }}/category/mobile-phones" class="category-card block overflow-hidden rounded-2xl shadow-xl flex flex-col">
+                    <div class="aspect-square bg-gradient-to-b from-blue-50 to-white flex-1 flex items-center justify-center overflow-hidden">
+                        <img src="{{ app_url }}/images/categories/phone.png" alt="Mobile Phones" class="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    <div class="category-label text-white text-center font-black uppercase py-4 text-lg tracking-wider flex-none">
+                        Mobile Phones
+                    </div>
+                </a>
+                <a href="{{ app_url }}/category/tempered-glass" class="category-card block overflow-hidden rounded-2xl shadow-xl flex flex-col">
+                    <div class="aspect-square bg-gradient-to-b from-blue-50 to-white flex-1 flex items-center justify-center overflow-hidden">
+                        <img src="{{ app_url }}/images/categories/tempered.png" alt="Tempered Glass" class="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    <div class="category-label text-white text-center font-black uppercase py-4 text-lg tracking-wider flex-none">
+                        Tempered Glass
+                    </div>
+                </a>
+                <a href="{{ app_url }}/category/gadgets" class="category-card block overflow-hidden rounded-2xl shadow-xl flex flex-col">
+                    <div class="aspect-square bg-gradient-to-b from-blue-50 to-white flex-1 flex items-center justify-center overflow-hidden">
+                        <img src="{{ app_url }}/images/categories/gadgets.png" alt="Gadgets" class="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    <div class="category-label text-white text-center font-black uppercase py-4 text-lg tracking-wider flex-none">
+                        Gadgets
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products - Horizontal Scroll -->
+{% set featured_by_category = {} %}
+
+{% for product in featured_products %}
+
+    {% set cat = product.category_name %}
+
+    {% if cat is empty %}
+        {% set cat = 'Other' %}
+    {% endif %}
+
+    {% if featured_by_category[cat] is not defined %}
+        {% set featured_by_category = featured_by_category|merge({ (cat): [product] }) %}
+    {% else %}
+        {% set list = featured_by_category[cat] %}
+        {% set list = list|merge([product]) %}
+        {% set featured_by_category = featured_by_category|merge({ (cat): list }) %}
+    {% endif %}
+{% endfor %}
+
+<section id="shop" class="py-14 bg-gray-50 scroll-mt-16 md:scroll-mt-24">
+    <div class="container mx-auto px-4">
+
+        {% if featured_by_category|length == 0 %}
+            <p class="text-gray-600 text-center text-lg">No featured products available.</p>
+        {% endif %}
+
+        {% for cat, items in featured_by_category %}
+            <div class="mb-14">
+
+                <!-- CATEGORY NAME -->
+                <h2 class="category-title-decorated text-3xl md:text-5xl font-black mb-8 uppercase tracking-wide">
+                    {{ cat }}
+                </h2>
+
+                <!-- Horizontal Scroll Row -->
+                <div class="flex gap-6 overflow-x-auto pb-4 px-1 snap-x snap-mandatory scrollbar-hide"
+                     style="scroll-behavior:smooth;">
+
+                    {% for product in items %}
+                    <div class="product-card min-w-[280px] max-w-[280px] shadow-xl overflow-hidden rounded-2xl snap-start flex-shrink-0">
+
+                        <div class="relative overflow-hidden bg-gray-100">
+                            <img src="{{ app_url }}/{{ product.image_path }}"
+     alt="{{ product.name }}"
+     class="w-full h-64 object-contain p-4 bg-white" loading="lazy" />
+
+                            {% if product.is_featured %}
+                                <span class="bestseller-badge absolute top-3 left-3 px-4 py-2 text-white text-xs font-bold rounded-full shadow-lg">BESTSELLER</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-5 bg-white">
+                            <h3 class="font-bold text-lg mb-2 line-clamp-2 min-h-[3.5rem]">{{ product.name }}</h3>
+
+                            <div class="flex items-center justify-between mt-4">
+                                <span class="text-2xl font-black text-black">₹{{ product.price }}</span>
+                                <a href="{{ app_url }}/product/{{ product.slug }}"
+                                   class="view-btn text-sm text-black uppercase tracking-wider">
+                                   View →
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+    <!-- Benefits -->
+    <section class="py-14 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="benefit-card p-8 rounded-2xl shadow-lg text-center">
+                    <span class="benefit-icon">🚚</span>
+                    <h4 class="font-black text-xl mb-2 uppercase tracking-wide">Free Shipping</h4>
+                    <p class="text-sm text-gray-600 font-medium">On orders over ₹999</p>
+                </div>
+
+                <div class="benefit-card p-8 rounded-2xl shadow-lg text-center">
+                    <span class="benefit-icon">↩️</span>
+                    <h4 class="font-black text-xl mb-2 uppercase tracking-wide">7-Day Return</h4>
+                    <p class="text-sm text-gray-600 font-medium">Hassle-free exchanges</p>
+                </div>
+
+                <div class="benefit-card p-8 rounded-2xl shadow-lg text-center">
+                    <span class="benefit-icon">🔒</span>
+                    <h4 class="font-black text-xl mb-2 uppercase tracking-wide">Secure Checkout</h4>
+                    <p class="text-sm text-gray-600 font-medium">Payments protected</p>
+                </div>
+
+                <div class="benefit-card p-8 rounded-2xl shadow-lg text-center">
+                    <span class="benefit-icon">⭐</span>
+                    <h4 class="font-black text-xl mb-2 uppercase tracking-wide">Top Quality</h4>
+                    <p class="text-sm text-gray-600 font-medium">Premium materials</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

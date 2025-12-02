@@ -1,0 +1,86 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-14 bg-[var(--brand-light)] min-h-screen">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-8 text-[var(--brand-heading)]">My Account</h1>
+
+        {% if session.flash.success %}
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                {{ session.flash.success }}
+            </div>
+        {% endif %}
+
+        <div class="grid md:grid-cols-4 gap-6">
+            <!-- Sidebar -->
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+                    <h3 class="font-semibold mb-4">Welcome, {{ user.name }}!</h3>
+                    <nav class="space-y-2">
+                        <a href="{{ app_url }}/account" class="block px-3 py-2 rounded bg-[var(--brand-light)] font-medium">Dashboard</a>
+                        <a href="{{ app_url }}/account/profile" class="block px-3 py-2 rounded hover:bg-[var(--brand-light)]">Profile</a>
+                        <a href="{{ app_url }}/wishlist" class="block px-3 py-2 rounded hover:bg-[var(--brand-light)]">Wishlist</a>
+                        <a href="{{ app_url }}/logout" class="block px-3 py-2 rounded hover:bg-red-50 text-red-600">Logout</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="md:col-span-3">
+               <div class="grid sm:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+        <h4 class="font-semibold mb-2">Total Orders</h4>
+        <p class="text-3xl font-bold text-[var(--brand-primary)]">
+            {{ total_orders }}
+        </p>
+    </div>
+    <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+        <h4 class="font-semibold mb-2">Wishlist Items</h4>
+        <p class="text-3xl font-bold text-[var(--brand-primary)]">
+            {{ wishlist_count }}
+        </p>
+    </div>
+</div>
+
+                <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+                    <h3 class="text-xl font-semibold mb-4">Recent Orders</h3>
+                    <p class="text-gray-600">No orders yet. <a href="{{ app_url }}/products" class="link-accent">Start shopping</a></p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <a href="{{ app_url }}/orders" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-[var(--brand-text)]">My Orders</h3>
+            <svg class="w-8 h-8 text-[var(--brand-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+        </div>
+        <p class="text-gray-600 text-sm">View your order history and track deliveries</p>
+    </a>
+
+    <a href="{{ app_url }}/account/profile" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-[var(--brand-text)]">My Profile</h3>
+            <svg class="w-8 h-8 text-[var(--brand-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        </div>
+        <p class="text-gray-600 text-sm">Manage your account details</p>
+    </a>
+
+    <a href="{{ app_url }}/cart" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-[var(--brand-text)]">My Cart</h3>
+            <svg class="w-8 h-8 text-[var(--brand-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+        </div>
+        <p class="text-gray-600 text-sm">View items in your shopping cart</p>
+    </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base.twig" %}
+
+{% block title %}Reviews — Admin{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes adminFadeUp {
+        from { opacity:0; transform: translateY(20px); }
+        to   { opacity:1; transform: translateY(0); }
+    }
+    .admin-shell {
+        background: radial-gradient(circle at top, #f9fafb 0%, #e5e7eb 40%, #f3f4f6 100%);
+        min-height: calc(100vh - 64px);
+    }
+    .admin-panel {
+        animation: adminFadeUp .4s ease-out;
+    }
+    .admin-card {
+        background:#ffffff;
+        border-radius:1.1rem;
+        box-shadow:0 18px 40px rgba(15,23,42,0.12),0 0 0 1px rgba(148,163,184,0.25);
+        border:1px solid rgba(148,163,184,0.5);
+    }
+    .admin-pill {
+        font-size:.7rem;
+        text-transform:uppercase;
+        letter-spacing:.18em;
+        color:#6b7280;
+    }
+    .status-pill{
+        font-size:11px;
+        padding:0.2rem 0.6rem;
+        border-radius:999px;
+        font-weight:600;
+        display:inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-shell py-8">
+    <div class="container mx-auto px-4 admin-panel">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <a href="{{ app_url }}/admin"
+                   class="px-3 py-1 rounded-full border border-[var(--card-border)] text-[11px] font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)]">
+                    ← Dashboard
+                </a>
+                <div>
+                    <p class="admin-pill mb-1">Admin / Reviews</p>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-[0.14em] uppercase text-[var(--brand-heading)]">
+                        Product Reviews
+                    </h1>
+                    <p class="text-xs md:text-sm text-gray-500 mt-1">
+                        Moderate customer feedback and keep quality high.
+                    </p>
+                </div>
+            </div>
+            <form method="GET" class="flex gap-2">
+                <select name="status"
+                        class="border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm"
+                        onchange="this.form.submit()">
+                    <option value="pending"  {% if status == 'pending'  %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="all"      {% if status == 'all'      %}selected{% endif %}>All</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="admin-card overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                        <th class="p-3">Product</th>
+                        <th class="p-3">Customer</th>
+                        <th class="p-3">Rating</th>
+                        <th class="p-3">Comment</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for review in items %}
+                    <tr class="border-t border-[var(--card-border)] bg-white hover:bg-gray-50 align-top">
+                        <td class="p-3">
+                            <p class="font-semibold text-[var(--brand-text)] text-sm">{{ review.product_name }}</p>
+                            <p class="text-[11px] text-gray-500">#{{ review.product_id }}</p>
+                        </td>
+                        <td class="p-3">
+                            <p class="font-semibold text-sm">{{ review.user_name }}</p>
+                            <p class="text-[11px] text-gray-500">{{ review.created_at|date('d M Y') }}</p>
+                        </td>
+                        <td class="p-3">
+                            <div class="flex text-yellow-500 text-sm">
+                                {% for i in 1..5 %}
+                                    {% if review.rating >= i %}
+                                        <span>★</span>
+                                    {% else %}
+                                        <span class="text-gray-300">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="p-3 max-w-md">
+                            {% if review.title %}
+                                <p class="font-semibold text-sm mb-1">{{ review.title }}</p>
+                            {% endif %}
+                            <p class="text-sm text-gray-600 mb-1">{{ review.comment }}</p>
+                            {% if review.is_verified_purchase %}
+                                <span class="text-xs text-green-600 font-semibold">✓ Verified purchase</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            {% if review.status == 'Approved' %}
+                                <span class="status-pill bg-green-100 text-green-700">Approved</span>
+                            {% elseif review.status == 'Rejected' %}
+                                <span class="status-pill bg-red-100 text-red-700">Rejected</span>
+                            {% else %}
+                                <span class="status-pill bg-yellow-100 text-yellow-700">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            <form action="{{ app_url }}/admin/reviews/{{ review.id }}/status"
+                                  method="POST"
+                                  class="flex flex-col gap-2 text-xs">
+                                <input type="hidden" name="_token" value="{{ csrf_token }}">
+                                <select name="status"
+                                        class="border border-[var(--card-border)] rounded-lg px-2 py-1 text-xs">
+                                    <option value="pending"  {% if review.status == 'Pending'  %}selected{% endif %}>Pending</option>
+                                    <option value="approved" {% if review.status == 'Approved' %}selected{% endif %}>Approve</option>
+                                    <option value="rejected" {% if review.status == 'Rejected' %}selected{% endif %}>Reject</option>
+                                </select>
+                                <button type="submit"
+                                        class="px-3 py-1 rounded-full bg-[var(--brand-navbar)] text-white text-[11px] font-semibold hover:bg-black">
+                                    Update
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="p-6 text-center text-gray-500 text-sm">
+                            No reviews found.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

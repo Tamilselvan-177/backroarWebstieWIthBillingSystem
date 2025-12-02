@@ -1,0 +1,111 @@
+{% extends "base.twig" %}
+
+{% block title %}Edit Subcategory — Admin{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes fadeUpAdmin {
+        from { opacity:0; transform:translateY(18px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    .admin-form-shell{
+        background: radial-gradient(circle at top, #f9fafb 0%, #e5e7eb 40%, #f3f4f6 100%);
+        min-height: calc(100vh - 64px);
+    }
+    .admin-form-card{
+        background:#ffffff;
+        border-radius:1.1rem;
+        box-shadow:0 18px 40px rgba(15,23,42,0.12),0 0 0 1px rgba(148,163,184,0.25);
+        border:1px solid rgba(148,163,184,0.5);
+        animation:fadeUpAdmin .4s ease-out;
+    }
+    .admin-label{
+        font-size:.75rem;
+        text-transform:uppercase;
+        letter-spacing:.14em;
+        color:#6b7280;
+        font-weight:600;
+    }
+    .admin-input{
+        border-radius:.8rem;
+        border:1px solid var(--card-border);
+        padding:.55rem .8rem;
+        font-size:.85rem;
+        width:100%;
+    }
+    .admin-input:focus{
+        outline:none;
+        border-color:#111827;
+        box-shadow:0 0 0 1px #111827,0 0 0 3px rgba(15,23,42,0.12);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-form-shell py-8">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <a href="{{ app_url }}/admin" class="px-3 py-1 rounded-full border border-[var(--card-border)] text-[11px] font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)]">← Dashboard</a>
+                <div>
+                    <p class="admin-label mb-1">Admin / Subcategories</p>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-[0.14em] uppercase text-[var(--brand-heading)]">Edit Subcategory</h1>
+                    <p class="text-sm text-gray-600 font-medium">Editing: {{ subcategory.name }}</p>
+                </div>
+            </div>
+            <a href="{{ app_url }}/admin/subcategories" class="px-4 py-2 rounded-full border border-[var(--card-border)] text-xs font-semibold text-gray-700 hover:bg-[var(--card-bg-alt)]">Back to list</a>
+        </div>
+
+        <form action="{{ app_url }}/admin/subcategories/{{ subcategory.id }}" method="post" class="admin-form-card grid grid-cols-1 md:grid-cols-2 gap-6 p-6 md:p-8">
+            <input type="hidden" name="_method" value="PUT">
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+
+            {% if errors %}
+            <div class="md:col-span-2 bg-red-50 border border-red-200 rounded-lg p-4">
+                {% for field, msgs in errors %}
+                    {% for msg in msgs %}
+                        <p class="text-red-700 text-sm mb-1">{{ msg }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="admin-label mb-1 block">Category *</label>
+                <select name="category_id" class="admin-input" required>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if c.id == (old.category_id ?? subcategory.category_id) %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Name *</label>
+                <input type="text" name="name" value="{{ old.name ?? subcategory.name }}" class="admin-input" required />
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Slug</label>
+                <input type="text" name="slug" value="{{ old.slug ?? subcategory.slug }}" class="admin-input" />
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Display Order</label>
+                <input type="number" name="display_order" value="{{ old.display_order ?? subcategory.display_order }}" min="0" class="admin-input" />
+            </div>
+
+            <div class="flex items-center space-x-4 text-xs md:col-span-2">
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="is_active" {% if (old.is_active ?? subcategory.is_active) %}checked{% endif %}>
+                    <span>Active</span>
+                </label>
+            </div>
+
+            <div class="md:col-span-2 flex justify-end gap-3">
+                <a href="{{ app_url }}/admin/subcategories" class="px-6 py-2 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100">Cancel</a>
+                <button type="submit" class="px-6 py-2 rounded-full bg-[var(--brand-navbar)] text-white text-xs font-semibold hover:bg-black">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

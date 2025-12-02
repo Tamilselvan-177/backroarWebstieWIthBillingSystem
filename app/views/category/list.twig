@@ -1,0 +1,183 @@
+{% extends 'base.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+    @keyframes catFadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cat-section-title {
+        position: relative;
+        display: inline-block;
+        background: linear-gradient(135deg,#111827,#4b5563);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: .18em;
+    }
+    .cat-section-title::after {
+        content:'';
+        position:absolute;
+        left:50%;
+        bottom:-10px;
+        transform:translateX(-50%);
+        width:80px;
+        height:3px;
+        border-radius:999px;
+        background:linear-gradient(90deg,transparent,#111827,transparent);
+    }
+
+    .cat-card {
+        background: #020617;                 /* dark overall so bottom matches corners */
+        border: 1px solid #e5e7eb;
+        border-radius: 1rem;
+        overflow: hidden;                    /* image + footer clipped to same radius */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        transition: all .35s cubic-bezier(0.16,1,0.3,1);
+        animation: catFadeInUp .5s ease-out forwards;
+        opacity: 0;
+    }
+    .cat-card:nth-child(1){animation-delay:.03s;}
+    .cat-card:nth-child(2){animation-delay:.06s;}
+    .cat-card:nth-child(3){animation-delay:.09s;}
+    .cat-card:nth-child(4){animation-delay:.12s;}
+    .cat-card:nth-child(5){animation-delay:.15s;}
+    .cat-card:nth-child(6){animation-delay:.18s;}
+    .cat-card:nth-child(7){animation-delay:.21s;}
+    .cat-card:nth-child(8){animation-delay:.24s;}
+
+    .cat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+        border-color:#111827;
+    }
+
+    .cat-image-wrap {
+        position:relative;
+        overflow:hidden;
+        background: radial-gradient(circle at top,#e5e7eb,#f9fafb);
+        aspect-ratio: 3 / 4;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+    @media (min-width:768px){
+        .cat-image-wrap{ aspect-ratio: 1 / 1; }
+    }
+
+    .cat-image-wrap::before{
+        content:'';
+        position:absolute;
+        top:0;left:-120%;
+        width:60%;
+        height:100%;
+        background:linear-gradient(90deg,transparent,rgba(255,255,255,0.65),transparent);
+        transition:transform .7s ease-out;
+        transform:skewX(-20deg) translateX(0);
+        pointer-events:none;
+        z-index:1;
+    }
+    .cat-card:hover .cat-image-wrap::before{
+        transform:skewX(-20deg) translateX(260%);
+    }
+
+    .cat-image {
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        transition:transform .55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .cat-card:hover .cat-image{
+        transform:scale(1.08) rotate(.5deg);
+    }
+
+    .cat-footer {
+        background:#020617;                  /* same as card background */
+        color:#f9fafb;
+        text-align:center;
+        padding:0.6rem 0.5rem 0.8rem;
+        margin:0;                            /* remove any gap */
+    }
+
+    .cat-name {
+        font-size:.8rem;
+        letter-spacing:.16em;
+    }
+    .cat-count {
+        font-size:.68rem;
+        color:#d1d5db;
+    }
+
+    @media (max-width:640px){
+        .cat-footer{
+            padding-top:0.5rem;
+            padding-bottom:0.6rem;
+        }
+        .cat-name{
+            font-size:.7rem;
+            letter-spacing:.14em;
+        }
+        .cat-count{
+            font-size:.62rem;
+        }
+    }
+</style>
+
+<section class="py-14 bg-gradient-to-b from-white to-gray-50">
+    <div class="container mx-auto px-4">
+
+        <div class="text-center mb-10">
+            <h1 class="cat-section-title text-xs md:text-sm font-black tracking-[0.3em] uppercase">
+                Shop by Categories
+            </h1>
+        </div>
+
+        {% if categories is not empty %}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+
+                {% for category in categories %}
+                    <a href="{{ app_url }}/category/{{ category.slug }}"
+                       class="cat-card group block">
+
+                        <div class="cat-image-wrap">
+                            {% if category.image_path %}
+                                <img src="{{ app_url }}/{{ category.image_path }}"
+                                     alt="{{ category.name }}"
+                                     class="cat-image"
+                                     loading="lazy"
+                                     decoding="async"
+                                     onerror="this.src='{{ app_url }}/images/placeholder.png'">
+                            {% else %}
+                                <img src="{{ app_url }}/images/placeholder.png"
+                                     class="cat-image opacity-80"
+                                     alt="No Image">
+                            {% endif %}
+                        </div>
+
+                        <div class="cat-footer">
+                            <span class="cat-name font-semibold uppercase block tracking-[0.18em]">
+                                {{ category.name }}
+                            </span>
+                            {% if category.product_count %}
+                                <span class="cat-count mt-1 block">
+                                    ({{ category.product_count }} items)
+                                </span>
+                            {% endif %}
+                        </div>
+
+                    </a>
+                {% endfor %}
+
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <p class="text-gray-600 text-lg">No categories found.</p>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

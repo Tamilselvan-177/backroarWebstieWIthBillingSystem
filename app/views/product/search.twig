@@ -1,0 +1,77 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0; background: #f8f9fa;">
+    <div class="container">
+        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">Search Results</h1>
+        <p style="color: #666; margin-bottom: 30px;">
+            Found {{ pagination.total }} results for "<strong>{{ keyword }}</strong>"
+        </p>
+
+        {% if products|length > 0 %}
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div style="background: white; border-radius: 8px; overflow: hidden; transition: all 0.3s; border: 1px solid #eee;">
+                    <a href="/product/{{ product.slug }}" style="text-decoration: none; color: inherit;">
+                        <div style="aspect-ratio: 1; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                            {% if product.image_path %}
+                            <img src="{{ product.image_path }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                            <span style="font-size: 48px;">📦</span>
+                            {% endif %}
+                        </div>
+                        <div style="padding: 15px;">
+                            {% if product.brand_name %}
+                            <p style="font-size: 12px; color: #999; margin: 0 0 5px 0; text-transform: uppercase;">{{ product.brand_name }}</p>
+                            {% endif %}
+                            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 5px 0; line-height: 1.4;">{{ product.name }}</h3>
+                            <p style="font-size: 12px; color: #666; margin: 0 0 10px 0;">{{ product.category_name }}</p>
+                            <span style="font-size: 18px; font-weight: 700;">₹{{ product.price }}</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.total_pages > 1 %}
+        <div style="display: flex; justify-content: center; margin-top: 30px;">
+            <nav>
+                <ul class="pagination">
+                    {% if pagination.current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ keyword }}&page={{ pagination.current_page - 1 }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page in 1..pagination.total_pages %}
+                    <li class="page-item {% if page == pagination.current_page %}active{% endif %}">
+                        <a class="page-link" href="?q={{ keyword }}&page={{ page }}">{{ page }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if pagination.current_page < pagination.total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ keyword }}&page={{ pagination.current_page + 1 }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div style="background: white; padding: 60px; text-align: center; border-radius: 8px;">
+            <p style="font-size: 48px; margin-bottom: 20px;">🔍</p>
+            <h3 style="font-size: 24px; font-weight: 600; margin-bottom: 10px;">No Results Found</h3>
+            <p style="color: #666; margin-bottom: 20px;">We couldn't find any products matching "{{ keyword }}"</p>
+            <a href="/products" class="btn btn-dark">Browse All Products</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

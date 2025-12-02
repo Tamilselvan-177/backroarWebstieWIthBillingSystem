@@ -1,0 +1,250 @@
+{% extends "base.twig" %}
+
+{% block title %}Edit Product — Admin{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes fadeUpAdmin {
+        from { opacity:0; transform:translateY(18px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    .admin-form-shell{
+        background: radial-gradient(circle at top, #f9fafb 0%, #e5e7eb 40%, #f3f4f6 100%);
+        min-height: calc(100vh - 64px);
+    }
+    .admin-form-card{
+        background:#ffffff;
+        border-radius:1.1rem;
+        box-shadow:0 18px 40px rgba(15,23,42,0.12),0 0 0 1px rgba(148,163,184,0.25);
+        border:1px solid rgba(148,163,184,0.5);
+        animation:fadeUpAdmin .4s ease-out;
+    }
+    .admin-label{
+        font-size:.75rem;
+        text-transform:uppercase;
+        letter-spacing:.14em;
+        color:#6b7280;
+        font-weight:600;
+    }
+    .admin-input{
+        border-radius:.8rem;
+        border:1px solid var(--card-border);
+        padding:.55rem .8rem;
+        font-size:.85rem;
+        width:100%;
+    }
+    .admin-input:focus{
+        outline:none;
+        border-color:#111827;
+        box-shadow:0 0 0 1px #111827,0 0 0 3px rgba(15,23,42,0.12);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-form-shell py-8">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <a href="{{ app_url }}/admin"
+                   class="px-3 py-1 rounded-full border border-[var(--card-border)] text-[11px] font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)]">
+                    ← Dashboard
+                </a>
+                <div>
+                    <p class="admin-label mb-1">Admin / Products</p>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-[0.14em] uppercase text-[var(--brand-heading)]">
+                        Edit Product
+                    </h1>
+                    <p class="text-sm text-gray-600 font-medium">Editing: {{ product.name }}</p>
+                </div>
+            </div>
+            <a href="{{ app_url }}/admin/products/{{ product.id }}/images"
+               class="px-4 py-2 rounded-full bg-[var(--brand-navbar)] text-white text-xs font-semibold hover:bg-black">
+                🖼 Manage Images
+            </a>
+        </div>
+
+        <form action="{{ app_url }}/admin/products/{{ product.id }}" method="post" class="admin-form-card grid grid-cols-1 md:grid-cols-2 gap-6 p-6 md:p-8">
+            <input type="hidden" name="_method" value="PUT">
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+
+            {% if errors %}
+            <div class="md:col-span-2 bg-red-50 border border-red-200 rounded-lg p-4">
+                {% for field, msgs in errors %}
+                    {% for msg in msgs %}
+                        <p class="text-red-700 text-sm mb-1">{{ msg }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="admin-label mb-1 block">Name *</label>
+                <input type="text" name="name" value="{{ old.name ?? product.name }}" class="admin-input" required />
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Slug</label>
+                <input type="text" name="slug" value="{{ old.slug ?? product.slug }}" class="admin-input" />
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Category *</label>
+                <select name="category_id" id="categoryid" class="admin-input" required>
+                    <option value="">Select Category</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if c.id == (old.category_id ?? product.category_id) %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Brand</label>
+                <select name="brand_id" id="brandid" class="admin-input">
+                    <option value="">None</option>
+                    {% for b in brands %}
+                    <option value="{{ b.id }}" {% if b.id == (old.brand_id ?? product.brand_id) %}selected{% endif %}>{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Subcategory</label>
+                <select name="subcategory_id" id="subcategoryid" class="admin-input">
+                    <option value="">Select after category</option>
+                    {% for s in subcategories %}
+                    <option value="{{ s.id }}" {% if s.id == (old.subcategory_id ?? product.subcategory_id) %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Model</label>
+                <select name="model_id" id="modelid" class="admin-input">
+                    <option value="">Select after brand</option>
+                    {% for m in models %}
+                    <option value="{{ m.id }}" {% if m.id == (old.model_id ?? product.model_id) %}selected{% endif %}>{{ m.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Price *</label>
+                <input type="number" step="0.01" min="0" name="price" value="{{ old.price ?? product.price }}" class="admin-input" required />
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Sale Price</label>
+                <input type="number" step="0.01" min="0" name="sale_price" value="{{ old.sale_price ?? product.sale_price }}" class="admin-input" />
+            </div>
+
+            <div>
+                <label class="admin-label mb-1 block">Stock Quantity</label>
+                <input type="number" min="0" name="stock_quantity" value="{{ old.stock_quantity ?? product.stock_quantity }}" class="admin-input" />
+            </div>
+
+            <div class="flex items-center space-x-4 text-xs md:col-span-2">
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="is_active" {% if (old.is_active ?? product.is_active) %}checked{% endif %}>
+                    <span>Active</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="is_featured" {% if (old.is_featured ?? product.is_featured) %}checked{% endif %}>
+                    <span>Featured</span>
+                </label>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="admin-label mb-1 block">Description</label>
+                <textarea name="description" class="admin-input" rows="4">{{ old.description ?? product.description }}</textarea>
+            </div>
+
+            <div class="md:col-span-2 flex justify-end gap-3">
+                <a href="{{ app_url }}/admin/products" class="px-6 py-2 rounded-full border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 rounded-full bg-[var(--brand-navbar)] text-white text-xs font-semibold hover:bg-black">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const catSel = document.getElementById('categoryid');
+const brandSel = document.getElementById('brandid');
+const subSel = document.getElementById('subcategoryid');
+const modelSel = document.getElementById('modelid');
+
+async function loadSubcategories(cid) {
+    subSel.innerHTML = '<option value="">Loading...</option>';
+    if (!cid) {
+        subSel.innerHTML = '<option value="">Select after category</option>';
+        return;
+    }
+    try {
+        const res = await fetch(`{{ app_url }}/admin/products/ajaxSubcategories/${cid}`);
+        const data = await res.json();
+        subSel.innerHTML = '<option value="">Select Subcategory</option>';
+        data.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            // Preserve selected subcategory
+            if (s.id == {{ product.subcategory_id|default('null')|escape('js') }}) {
+                opt.selected = true;
+            }
+            subSel.appendChild(opt);
+        });
+    } catch(e) {
+        subSel.innerHTML = '<option value="">Error loading</option>';
+    }
+}
+
+async function loadModels(bid) {
+    modelSel.innerHTML = '<option value="">Loading...</option>';
+    if (!bid) {
+        modelSel.innerHTML = '<option value="">Select after brand</option>';
+        return;
+    }
+    try {
+        const res = await fetch(`{{ app_url }}/admin/products/ajaxModels/${bid}`);
+        const data = await res.json();
+        modelSel.innerHTML = '<option value="">Select Model</option>';
+        data.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.name;
+            // Preserve selected model
+            if (m.id == {{ product.model_id|default('null')|escape('js') }}) {
+                opt.selected = true;
+            }
+            modelSel.appendChild(opt);
+        });
+    } catch(e) {
+        modelSel.innerHTML = '<option value="">Error loading</option>';
+    }
+}
+
+// Pre-load current values on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const currentCatId = {{ product.category_id|default(0) }};
+    const currentBrandId = {{ product.brand_id|default(0) }};
+    
+    if (currentCatId) {
+        catSel.value = currentCatId;
+        loadSubcategories(currentCatId);
+    }
+    if (currentBrandId) {
+        brandSel.value = currentBrandId;
+        loadModels(currentBrandId);
+    }
+});
+
+catSel?.addEventListener('change', e => loadSubcategories(e.target.value));
+brandSel?.addEventListener('change', e => loadModels(e.target.value));
+</script>
+{% endblock %}

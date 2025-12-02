@@ -1,0 +1,112 @@
+{% extends 'base.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-10 bg-[var(--body-bg)] min-h-screen">
+    <div class="container mx-auto px-4">
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div>
+                <p class="text-xs md:text-sm uppercase text-gray-500 tracking-[0.2em]">Wishlist</p>
+                <h1 class="text-3xl md:text-4xl font-black text-[var(--brand-heading)] tracking-wide">
+                    Saved for later
+                </h1>
+                <p class="text-gray-500 mt-2 text-sm">
+                    Items you like, ready whenever you are.
+                </p>
+            </div>
+            <a href="{{ app_url }}/products"
+               class="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)]">
+                Continue shopping
+                <span class="text-lg">→</span>
+            </a>
+        </div>
+
+        {% if items|length > 0 %}
+        <!-- Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in items %}
+            <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-[var(--card-border)] flex flex-col">
+                <!-- Image -->
+              <a href="{{ app_url }}/product/{{ item.slug }}"
+   class="relative aspect-[4/3] bg-[var(--card-bg-alt)] flex items-center justify-center overflow-hidden group">
+    {% if item.image_path %}
+        <img src="{{ item.image_path }}"
+             alt="{{ item.name }}"
+             class="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
+             loading="lazy">
+    {% else %}
+        <span class="text-5xl">📦</span>
+    {% endif %}
+    <span class="absolute left-3 top-3 bg-black/80 text-white text-[10px] uppercase tracking-[0.16em] px-2 py-1 rounded-full">
+        Saved
+    </span>
+</a>
+
+
+
+                <!-- Body -->
+                <div class="p-5 flex-1 flex flex-col gap-4">
+                    <div>
+                        <h3 class="font-semibold text-[var(--brand-text)] line-clamp-2 mb-1 text-sm md:text-base">
+                            {{ item.name }}
+                        </h3>
+                        <p class="text-xs text-gray-500">
+                            Saved on {{ item.created_at|date('d M Y') }}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        {% if item.sale_price %}
+                            <span class="text-lg md:text-xl font-bold text-black">₹{{ item.sale_price }}</span>
+                            <span class="text-xs md:text-sm text-gray-500 line-through">₹{{ item.price }}</span>
+                        {% else %}
+                            <span class="text-lg md:text-xl font-bold text-[var(--brand-text)]">₹{{ item.price }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col gap-2 mt-auto">
+                        <form action="{{ app_url }}/cart/add" method="POST" class="w-full">
+                            <input type="hidden" name="_token" value="{{ csrf_token }}">
+                            <input type="hidden" name="product_id" value="{{ item.product_id }}">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 rounded-lg bg-[var(--brand-navbar)] text-white text-xs md:text-sm font-semibold hover:bg-black transition">
+                                Add to cart
+                            </button>
+                        </form>
+
+                        <form action="{{ app_url }}/wishlist/remove-form" method="POST" class="w-full">
+    <input type="hidden" name="_token" value="{{ csrf_token }}">
+    <input type="hidden" name="product_id" value="{{ item.product_id }}">
+    <button type="submit"
+            class="w-full px-4 py-2 rounded-lg border border-[var(--card-border)] text-xs md:text-sm font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)] transition">
+        Remove
+    </button>
+</form>
+
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="bg-white rounded-2xl shadow p-12 text-center max-w-xl mx-auto">
+            <div class="text-6xl mb-4">💛</div>
+            <h2 class="text-2xl font-bold mb-2 text-[var(--brand-text)]">Wishlist is empty</h2>
+            <p class="text-gray-600 mb-6 text-sm md:text-base">
+                Save items you like and they’ll show up here.
+            </p>
+            <a href="{{ app_url }}/products"
+               class="inline-block px-6 py-3 bg-[var(--brand-navbar)] text-white rounded-lg font-bold text-sm md:text-base hover:bg-black transition">
+                Discover products
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

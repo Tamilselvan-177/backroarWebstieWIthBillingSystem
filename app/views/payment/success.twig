@@ -1,0 +1,14 @@
+{% extends "base.twig" %}
+
+{% block title %}Payment Successful{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-12">
+    <div class="bg-white rounded shadow p-8 text-center">
+        <h1 class="text-2xl font-bold mb-4">Payment Successful</h1>
+        <p class="mb-6">Your payment has been confirmed and the order is placed.</p>
+        <a href="{{ app_url }}/orders" class="bg-black text-white px-4 py-2 rounded">View Orders</a>
+    </div>
+    </section>
+{% endblock %}
+

@@ -1,0 +1,198 @@
+{% extends "base.twig" %}
+
+{% block title %}Products — Admin{% endblock %}
+
+{% block styles %}
+<style>
+    @keyframes adminFadeUp {
+        from { opacity:0; transform: translateY(20px); }
+        to   { opacity:1; transform: translateY(0); }
+    }
+    .admin-shell {
+        background: radial-gradient(circle at top, #f9fafb 0%, #e5e7eb 40%, #f3f4f6 100%);
+        min-height: calc(100vh - 64px);
+    }
+    .admin-panel {
+        animation: adminFadeUp .4s ease-out;
+    }
+    .admin-card {
+        background:#ffffff;
+        border-radius:1.1rem;
+        box-shadow:0 18px 40px rgba(15,23,42,0.12),0 0 0 1px rgba(148,163,184,0.25);
+        border:1px solid rgba(148,163,184,0.5);
+    }
+    .admin-pill {
+        font-size:.7rem;
+        text-transform:uppercase;
+        letter-spacing:.18em;
+        color:#6b7280;
+    }
+    .btn-xs {
+        font-size:11px;
+        padding:0.3rem 0.6rem;
+        border-radius:999px;
+        font-weight:600;
+        display:inline-flex;
+        align-items:center;
+        gap:0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-shell py-8">
+    <div class="container mx-auto px-4 admin-panel">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <a href="{{ app_url }}/admin"
+                   class="px-3 py-1 rounded-full border border-[var(--card-border)] text-[11px] font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)]">
+                    ← Dashboard
+                </a>
+                <div>
+                    <p class="admin-pill mb-1">Admin / Products</p>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-[0.14em] uppercase text-[var(--brand-heading)]">
+                        Products
+                    </h1>
+                </div>
+            </div>
+            <a href="{{ app_url }}/admin/products/create"
+               class="px-4 py-2 rounded-full bg-[var(--brand-navbar)] text-white text-xs md:text-sm font-semibold hover:bg-black shadow">
+                + Add Product
+            </a>
+        </div>
+
+        <!-- Flash messages -->
+        {% if session.flash.success %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-sm text-green-700">
+            {{ session.flash.success }}
+        </div>
+        {% endif %}
+        {% if session.flash.error %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+            {{ session.flash.error }}
+        </div>
+        {% endif %}
+
+        <!-- FIXED Filters -->
+        <form method="get" class="admin-card p-4 mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="q" value="{{ filters.q ?? '' }}"
+                   placeholder="Search name or slug"
+                   class="border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm w-full" />
+            <select name="category_id" class="border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm w-full">
+                <option value="">All Categories</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {% if filters.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="brand_id" class="border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm w-full">
+                <option value="">All Brands</option>
+                {% for b in brands %}
+                <option value="{{ b.id }}" {% if filters.brand_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="active" class="border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm w-full">
+                <option value="">Any Status</option>
+                <option value="1" {% if filters.active == '1' %}selected{% endif %}>Active</option>
+                <option value="0" {% if filters.active == '0' %}selected{% endif %}>Inactive</option>
+            </select>
+            <div class="md:col-span-4 flex justify-end">
+                <button class="px-4 py-2 rounded-full bg-[var(--brand-navbar)] text-white text-xs font-semibold hover:bg-black">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+
+        <!-- FIXED Table -->
+        <div class="admin-card overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Name</th>
+                        <th class="p-3">Category</th>
+                        <th class="p-3">Brand</th>
+                        <th class="p-3">Price</th>
+                        <th class="p-3">Stock</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for p in products %}
+                    <tr class="border-t border-[var(--card-border)] bg-white hover:bg-gray-50">
+                        <td class="p-3 align-top">{{ p.id }}</td>
+                        <td class="p-3 align-top">
+                            <div class="font-semibold text-[var(--brand-text)] text-sm">{{ p.name }}</div>
+                            <div class="text-[11px] text-gray-500 break-all">{{ p.slug }}</div>
+                        </td>
+                        <td class="p-3 align-top text-xs text-gray-700">{{ p.category_name }}</td>
+                        <td class="p-3 align-top text-xs text-gray-700">{{ p.brand_name|default('—') }}</td>
+                        <td class="p-3 align-top text-xs">₹{{ p.price }}</td>
+                        <td class="p-3 align-top text-xs">{{ p.stock_quantity }}</td>
+                        <td class="p-3 align-top text-xs space-y-1">
+                            {% if p.is_active %}
+                                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold block text-center">Active</span>
+                            {% else %}
+                                <span class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-semibold block text-center">Inactive</span>
+                            {% endif %}
+                            {% if p.is_featured %}
+                                <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-semibold block text-center">Featured</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3 align-top space-y-1">
+                            <div class="flex flex-wrap gap-1">
+                                <a href="{{ app_url }}/admin/products/{{ p.id }}/edit"
+                                   class="btn-xs bg-gray-900 text-white">
+                                    ✏ Edit
+                                </a>
+                                <a href="{{ app_url }}/admin/products/{{ p.id }}/images"
+                                   class="btn-xs bg-gray-700 text-white">
+                                    🖼 Images
+                                </a>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                <form action="{{ app_url }}/admin/products/{{ p.id }}/toggleActive" method="post" style="display:inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token }}">
+                                    <button class="btn-xs {{ p.is_active ? 'bg-yellow-500 text-white' : 'bg-green-600 text-white' }}">
+                                        {{ p.is_active ? 'Deactivate' : 'Activate' }}
+                                    </button>
+                                </form>
+                                <form action="{{ app_url }}/admin/products/{{ p.id }}/toggleFeatured" method="post" style="display:inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token }}">
+                                    <button class="btn-xs {{ p.is_featured ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-800' }}">
+                                        ★ {{ p.is_featured ? 'Unfeature' : 'Feature' }}
+                                    </button>
+                                </form>
+                                <form action="{{ app_url }}/admin/products/{{ p.id }}/delete" method="post" style="display:inline" onsubmit="return confirm('Delete product?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token }}">
+                                    <button class="btn-xs bg-red-600 text-white">
+                                        🗑 Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="p-4 text-center text-gray-600 text-sm">No products found</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FIXED Pagination -->
+        {% if pagination.total_pages > 1 %}
+        <div class="mt-6 flex justify-center space-x-2 text-xs">
+            {% for i in 1..pagination.total_pages %}
+                <a href="?page={{ i }}&q={{ filters.q ?? '' }}&category_id={{ filters.category_id ?? '' }}&brand_id={{ filters.brand_id ?? '' }}&active={{ filters.active ?? '' }}"
+                   class="px-3 py-1 rounded-full {{ i == pagination.current_page ? 'bg-[var(--brand-navbar)] text-white' : 'bg-gray-200 hover:bg-gray-300' }}">
+                    {{ i }}
+                </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

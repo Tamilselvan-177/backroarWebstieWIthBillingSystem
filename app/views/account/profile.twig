@@ -1,0 +1,103 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="py-14 bg-[var(--brand-light)] min-h-screen">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-8 text-[var(--brand-heading)]">My Profile</h1>
+
+        <div class="grid md:grid-cols-4 gap-6">
+            <!-- Sidebar -->
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+                    <h3 class="font-semibold mb-4">Account Menu</h3>
+                    <nav class="space-y-2">
+                        <a href="{{ app_url }}/account" class="block px-3 py-2 rounded hover:bg-[var(--brand-light)]">Dashboard</a>
+                        <a href="{{ app_url }}/account/profile" class="block px-3 py-2 rounded bg-[var(--brand-light)] font-medium">Profile</a>
+                                                <a href="{{ app_url }}/wishlist" class="block px-3 py-2 rounded hover:bg-[var(--brand-light)]">Wishlist</a>
+
+                        <a href="{{ app_url }}/logout" class="block px-3 py-2 rounded hover:bg-red-50 text-red-600">Logout</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <div class="md:col-span-3">
+                <div class="bg-white rounded-lg shadow border border-[var(--card-border)] p-6">
+                    <h3 class="text-xl font-semibold mb-6">Update Profile</h3>
+
+                    {% if session.flash.success %}
+                        <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                            {{ session.flash.success }}
+                        </div>
+                    {% endif %}
+
+                    {% if session.flash.error %}
+                        <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            {{ session.flash.error }}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ app_url }}/account/profile" class="space-y-5">
+                        <input type="hidden" name="_token" value="{{ csrf_token }}">
+                        <!-- Name -->
+                        <div>
+                            <label for="name" class="block text-sm font-medium mb-2">Full Name</label>
+                            <input 
+                                type="text" 
+                                id="name" 
+                                name="name" 
+                                value="{{ old.name ?: user.name }}" 
+                                class="w-full px-4 py-3 rounded-lg border border-[var(--card-border)] focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)] outline-none"
+                                required
+                            />
+                            {% if errors.name %}
+                                <p class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email (readonly) -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium mb-2">Email Address</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                value="{{ user.email }}" 
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed" 
+                                readonly
+                            />
+                            <p class="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                        </div>
+
+                        <!-- Phone -->
+                        <div>
+                            <label for="phone" class="block text-sm font-medium mb-2">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                value="{{ old.phone ?: user.phone }}" 
+                                class="w-full px-4 py-3 rounded-lg border border-[var(--card-border)] focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary)] outline-none"
+                                maxlength="10"
+                                required
+                            />
+                            {% if errors.phone %}
+                                <p class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button 
+                            type="submit" 
+                            class="px-6 py-3 bg-[var(--brand-navbar)] hover:bg-black text-white font-semibold rounded-lg transition duration-200"
+                        >
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
