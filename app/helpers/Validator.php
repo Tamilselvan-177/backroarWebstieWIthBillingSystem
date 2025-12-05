@@ -128,4 +128,10 @@ class Validator
     {
         return $this->errors[$field] ?? null;
     }
+    public function addError($field, $message)
+{
+    $this->errors[$field] = $message;
+    return $this;
 }
+}
+

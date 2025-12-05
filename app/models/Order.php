@@ -10,70 +10,85 @@ class Order extends BaseModel
     /**
      * Create new order
      */
-    public function createOrder($userId, $cartItems, $address, $totals)
-    {
-        try {
-            $this->db->beginTransaction();
+    public function createOrder($userId, $cartItems, $address, $totals, $couponId = null, $couponCode = null, $discountAmount = 0)
+{
+    try {
+        $this->db->beginTransaction();
 
-            // Generate unique order number
-            $orderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+        // Generate unique order number
+        $orderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
 
-            // Insert order
-            $orderData = [
-                'user_id' => $userId,
-                'order_number' => $orderNumber,
-                'subtotal' => $totals['subtotal'],
-                'shipping_charge' => $totals['shipping'],
-                'total_amount' => $totals['total'],
-                'payment_method' => 'COD',
-                'payment_status' => 'Pending',
-                'order_status' => 'Pending',
-                'shipping_name' => $address['full_name'],
-                'shipping_phone' => $address['phone'],
-                'shipping_address' => $address['address_line1'] . 
-                    ($address['address_line2'] ? ', ' . $address['address_line2'] : ''),
-                'shipping_city' => $address['city'],
-                'shipping_state' => $address['state'],
-                'shipping_pincode' => $address['pincode']
-            ];
-
-            $orderId = $this->create($orderData);
-
-            // Insert order items
-            foreach ($cartItems as $item) {
-                $price = $item['sale_price'] ?? $item['price'];
-                $subtotal = $price * $item['quantity'];
-
-                $this->insertOrderItem([
-                    'order_id' => $orderId,
-                    'product_id' => $item['product_id'],
-                    'product_name' => $item['product_name'],
-                    'price' => $price,
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal
-                ]);
-
-                // Update product stock
-                $this->updateProductStock($item['product_id'], $item['quantity']);
-            }
-
-            $this->db->commit();
-            return $orderId;
-
-        } catch (\Exception $e) {
-            $this->db->rollBack();
-            // Log exception for debugging
-            $logDir = __DIR__ . '/../../storage/logs';
-            if (!is_dir($logDir)) {
-                @mkdir($logDir, 0777, true);
-            }
-            $msg = "[createOrder] time=" . date('Y-m-d H:i:s') . "\n";
-            $msg .= "exception=" . $e->getMessage() . "\n";
-            $msg .= $e->getTraceAsString() . "\n\n";
-            file_put_contents($logDir . '/order_errors.log', $msg, FILE_APPEND);
-            return false;
+        // Build full shipping address line
+        $shippingAddress = $address['address_line1'];
+        if (!empty($address['address_line2'])) {
+            $shippingAddress .= ', ' . $address['address_line2'];
         }
+
+        // Insert order
+        $orderData = [
+            'user_id'         => $userId,
+            'order_number'    => $orderNumber,
+            'subtotal'        => $totals['subtotal'],
+            'shipping_charge' => $totals['shipping'],
+            'total_amount'    => $totals['total'],
+            'payment_method'  => 'COD',
+            'payment_status'  => 'Pending',
+            'order_status'    => 'Pending',
+
+            // Shipping
+            'shipping_name'    => $address['full_name'],
+            'shipping_phone'   => $address['phone'],
+            'shipping_address' => $shippingAddress,
+            'shipping_city'    => $address['city'],
+            'shipping_state'   => $address['state'],
+            'shipping_pincode' => $address['pincode'],
+
+            // Coupon support (these columns exist in `orders`)
+            'coupon_id'        => $couponId,
+            'coupon_code'      => $couponCode,
+            'discount_amount'  => $discountAmount,
+        ];
+
+        // Uses BaseModel::create() to insert and return new ID
+        $orderId = $this->create($orderData);
+
+        // Insert order items
+        foreach ($cartItems as $item) {
+            $price    = $item['sale_price'] ?? $item['price'];
+            $subtotal = $price * $item['quantity'];
+
+            $this->insertOrderItem([
+                'order_id'     => $orderId,
+                'product_id'   => $item['product_id'],
+                'product_name' => $item['product_name'],
+                'price'        => $price,
+                'quantity'     => $item['quantity'],
+                'subtotal'     => $subtotal,
+            ]);
+
+            // Update stock
+            $this->updateProductStock($item['product_id'], $item['quantity']);
+        }
+
+        $this->db->commit();
+        return $orderId;
+
+    } catch (\Exception $e) {
+        $this->db->rollBack();
+
+        $logDir = __DIR__ . '/../../storage/logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0777, true);
+        }
+
+        $msg  = "[createOrder] " . date('Y-m-d H:i:s') . "\n";
+        $msg .= "exception=" . $e->getMessage() . "\n";
+        $msg .= $e->getTraceAsString() . "\n\n";
+        file_put_contents($logDir . '/order_errors.log', $msg, FILE_APPEND);
+
+        return false;
     }
+}
 
     public function createPendingOrder($userId, $cartItems, $address, $totals)
     {

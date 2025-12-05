@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Coupon;
 use App\Helpers\Validator;
 
 class CheckoutController extends BaseController
@@ -17,69 +18,58 @@ class CheckoutController extends BaseController
 
     public function __construct()
     {
-        $this->cartModel = new Cart();
+        $this->cartModel   = new Cart();
         $this->addressModel = new Address();
-        $this->orderModel = new Order();
-        $this->userModel = new User();
+        $this->orderModel  = new Order();
+        $this->userModel   = new User();
     }
 
     /**
-     * Show checkout page
+     * Checkout page
      */
     public function index()
     {
-        // Check if user is logged in
         if (!\isLoggedIn()) {
             \flash('error', 'Please login to checkout');
             return $this->redirect('/login');
         }
 
-        $userId = \userId();
-
-        // Check if cart is empty
+        $userId    = \userId();
         $cartItems = $this->cartModel->getCartItems($userId);
+
         if (empty($cartItems)) {
             \flash('error', 'Your cart is empty');
             return $this->redirect('/cart');
         }
 
-        // Validate cart
         $validation = $this->cartModel->validateCart($userId);
         if (!$validation['valid']) {
-            foreach ($validation['errors'] as $error) {
-                \flash('error', $error);
+            foreach ($validation['errors'] as $e) {
+                \flash('error', $e);
             }
             return $this->redirect('/cart');
         }
 
-        // Get addresses
-        $addresses = $this->addressModel->getUserAddresses($userId);
+        $addresses      = $this->addressModel->getUserAddresses($userId);
         $defaultAddress = $this->addressModel->getDefaultAddress($userId);
-
-        // Get totals
-        $totals = $this->cartModel->getCartTotals($userId);
-
-        $customer = $this->userModel->getUserById($userId) ?: [];
-        $razorpayEnabled = getenv('RAZORPAY_KEY_ID') && getenv('RAZORPAY_KEY_SECRET');
+        $totals         = $this->cartModel->getCartTotals($userId);
 
         $this->view('checkout/index.twig', [
-            'title' => 'Checkout - BlackRoar',
-            'cart_items' => $cartItems,
-            'addresses' => $addresses,
+            'title'           => 'Checkout - BlackRoar',
+            'cart_items'      => $cartItems,
+            'addresses'       => $addresses,
             'default_address' => $defaultAddress,
-            'totals' => $totals,
-            'errors' => $_SESSION['errors'] ?? [],
-            'old' => $_SESSION['old'] ?? [],
-            'csrf_token' => csrf_token(),
-            'razorpay_enabled' => (bool)$razorpayEnabled,
-            'customer' => $customer
+            'totals'          => $totals,
+            'csrf_token'      => csrf_token(),
+            'errors'          => $_SESSION['errors'] ?? [],
+            'old'             => $_SESSION['old'] ?? [],
         ]);
 
         unset($_SESSION['errors'], $_SESSION['old']);
     }
 
     /**
-     * Add new address
+     * Add address
      */
     public function addAddress()
     {
@@ -88,49 +78,39 @@ class CheckoutController extends BaseController
         }
 
         if (!\csrf_verify($_POST['_token'] ?? null)) {
-            \flash('error', 'Session expired. Please refresh and try again.');
+            \flash('error', 'Session expired.');
             return $this->redirect('/checkout');
         }
 
         $data = [
-            'full_name' => \clean($_POST['full_name'] ?? ''),
-            'phone' => \clean($_POST['phone'] ?? ''),
-            'address_line1' => \clean($_POST['address_line1'] ?? ''),
-            'address_line2' => \clean($_POST['address_line2'] ?? ''),
-            'city' => \clean($_POST['city'] ?? ''),
-            'state' => \clean($_POST['state'] ?? ''),
-            'pincode' => \clean($_POST['pincode'] ?? ''),
-            'is_default' => isset($_POST['is_default']) ? 1 : 0
+            'full_name'     => clean($_POST['full_name']),
+            'phone'         => clean($_POST['phone']),
+            'address_line1' => clean($_POST['address_line1']),
+            'address_line2' => clean($_POST['address_line2']),
+            'city'          => clean($_POST['city']),
+            'state'         => clean($_POST['state']),
+            'pincode'       => clean($_POST['pincode']),
+            'is_default'    => isset($_POST['is_default']) ? 1 : 0,
+            'user_id'       => userId(),
         ];
 
-        // Validation
-        $validator = new Validator($data);
-        $validator->required('full_name', 'Full name is required')
-                  ->min('full_name', 3)
-                  ->required('phone', 'Phone is required')
-                  ->phone('phone')
-                  ->required('address_line1', 'Address is required')
-                  ->required('city', 'City is required')
-                  ->required('state', 'State is required')
-                  ->required('pincode', 'Pincode is required')
-                  ->custom('pincode', function($value) {
-                      return preg_match('/^\d{6}$/', $value);
-                  }, 'Pincode must be 6 digits');
+        $v = new Validator($data);
+        $v->required('full_name')->min('full_name', 3)
+          ->required('phone')->phone('phone')
+          ->required('address_line1')
+          ->required('city')
+          ->required('state')
+          ->required('pincode')
+          ->custom('pincode', fn($v) => preg_match('/^\d{6}$/', $v), "Pincode must be 6 digits");
 
-        if ($validator->fails()) {
-            $_SESSION['errors'] = $validator->getErrors();
-            $_SESSION['old'] = $data;
+        if ($v->fails()) {
+            $_SESSION['errors'] = $v->getErrors();
+            $_SESSION['old']    = $data;
             return $this->redirect('/checkout');
         }
 
-        // Add user_id
-        $data['user_id'] = \userId();
-
-        // Save address
-        $addressId = $this->addressModel->addAddress($data);
-
-        if ($addressId) {
-            \flash('success', 'Address added successfully');
+        if ($this->addressModel->addAddress($data)) {
+            \flash('success', 'Address added');
         } else {
             \flash('error', 'Failed to add address');
         }
@@ -139,121 +119,174 @@ class CheckoutController extends BaseController
     }
 
     /**
-     * Place order
+     * Apply coupon via AJAX
      */
-    public function placeOrder()
+    public function applyCoupon()
     {
+        header("Content-Type: application/json");
+
         if (!\isLoggedIn()) {
-            return $this->redirect('/login');
-        }
-
-        $userId = \userId();
-        $addressId = (int) ($_POST['address_id'] ?? 0);
-
-        // Debug logging
-        $logDir = __DIR__ . '/../../storage/logs';
-        if (!is_dir($logDir)) {
-            @mkdir($logDir, 0777, true);
-        }
-        $debug = [];
-        $debug[] = "[placeOrder] time=" . date('Y-m-d H:i:s');
-        $debug[] = "user_id={$userId}, address_id={$addressId}";
-
-        // Validate address
-        if ($addressId <= 0) {
-            \flash('error', 'Please select a delivery address');
-            file_put_contents($logDir . '/order_debug.log', implode("\n", $debug) . "\n[error] no_address_selected\n\n", FILE_APPEND);
-            return $this->redirect('/checkout');
-        }
-
-        // Verify address belongs to user
-        if (!$this->addressModel->verifyOwnership($addressId, $userId)) {
-            \flash('error', 'Invalid address');
-            file_put_contents($logDir . '/order_debug.log', implode("\n", $debug) . "\n[error] address_verify_failed\n\n", FILE_APPEND);
-            return $this->redirect('/checkout');
+            echo json_encode(['success' => false, 'message' => 'Please login']);
+            return;
         }
 
         if (!\csrf_verify($_POST['_token'] ?? null)) {
-            \flash('error', 'Session expired. Please refresh and try again.');
-            return $this->redirect('/checkout');
+            echo json_encode(['success' => false, 'message' => 'Invalid request']);
+            return;
         }
 
-        // Get address
-        $address = $this->addressModel->find($addressId);
+        $userId = userId();
+        $code   = trim($_POST['coupon_code'] ?? "");
 
-        // Get cart items
-        $cartItems = $this->cartModel->getCartItems($userId);
-        $debug[] = 'cart_items_count=' . count($cartItems);
-        if (empty($cartItems)) {
-            \flash('error', 'Your cart is empty');
-            file_put_contents($logDir . '/order_debug.log', implode("\n", $debug) . "\n[error] cart_empty\n\n", FILE_APPEND);
-            return $this->redirect('/cart');
+        if ($code === "") {
+            echo json_encode(['success' => false, 'message' => 'Coupon code required']);
+            return;
         }
 
-        // Validate cart
-        $validation = $this->cartModel->validateCart($userId);
-        $debug[] = 'cart_valid=' . ($validation['valid'] ? '1' : '0');
-        if (!$validation['valid']) {
-            $debug[] = 'validation_errors=' . implode('|', $validation['errors']);
-        }
-        if (!$validation['valid']) {
-            foreach ($validation['errors'] as $error) {
-                \flash('error', $error);
-            }
-            file_put_contents($logDir . '/order_debug.log', implode("\n", $debug) . "\n[error] cart_validation_failed\n\n", FILE_APPEND);
-            return $this->redirect('/cart');
+        $couponModel = new Coupon();
+        $coupon      = $couponModel->findByCode($code);
+
+        if (!$coupon) {
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired coupon']);
+            return;
         }
 
-        // Get totals
-        $totals = $this->cartModel->getCartTotals($userId);
-        $debug[] = 'totals=' . json_encode($totals);
+        $totals = $this->cartModel->calculateTotals($userId, $coupon);
 
-        // Create order
-        $orderId = $this->orderModel->createOrder($userId, $cartItems, $address, $totals);
-
-        $debug[] = 'createOrder_result=' . var_export($orderId, true);
-        file_put_contents($logDir . '/order_debug.log', implode("\n", $debug) . "\n\n", FILE_APPEND);
-
-        if ($orderId) {
-            // Clear cart
-            $this->cartModel->clearCart($userId);
-
-            // Get order
-            $order = $this->orderModel->getOrderById($orderId);
-
-            // Redirect to success page
-            return $this->redirect('/checkout/success/' . $order['order_number']);
-        } else {
-            \flash('error', 'Failed to place order. Please try again.');
-            file_put_contents($logDir . '/order_debug.log', "[placeOrder] Failed to create order for user {$userId}\n", FILE_APPEND);
-            return $this->redirect('/checkout');
+        if ($totals['discount'] <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Coupon not applicable']);
+            return;
         }
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Coupon applied',
+            'totals'  => $totals,
+        ]);
     }
 
     /**
-     * Order success page
+     * Place order
      */
-    public function success($orderNumber)
-    {
-        if (!\isLoggedIn()) {
-            return $this->redirect('/login');
-        }
-
-        // Get order
-        $order = $this->orderModel->getOrderByNumber($orderNumber, \userId());
-
-        if (!$order) {
-            \flash('error', 'Order not found');
-            return $this->redirect('/account/orders');
-        }
-
-        // Get order items
-        $orderItems = $this->orderModel->getOrderItems($order['id']);
-
-        $this->view('checkout/success.twig', [
-            'title' => 'Order Placed Successfully - BlackRoar',
-            'order' => $order,
-            'order_items' => $orderItems
-        ]);
+   public function placeOrder()
+{
+    if (!\isLoggedIn()) {
+        return $this->redirect('/login');
     }
+
+    $userId     = userId();
+    $addressId  = (int)($_POST['address_id'] ?? 0);
+    $couponCode = trim($_POST['coupon_code'] ?? '');
+
+    // Validate address
+    if ($addressId <= 0 || !$this->addressModel->verifyOwnership($addressId, $userId)) {
+        \flash("error", "Invalid address");
+        return $this->redirect("/checkout");
+    }
+
+    if (!\csrf_verify($_POST['_token'] ?? null)) {
+        \flash('error', 'Session expired.');
+        return $this->redirect('/checkout');
+    }
+
+    $address   = $this->addressModel->find($addressId);
+    $cartItems = $this->cartModel->getCartItems($userId);
+
+    if (empty($cartItems)) {
+        \flash("error", "Your cart is empty");
+        return $this->redirect("/cart");
+    }
+
+    // Validate cart
+    $validation = $this->cartModel->validateCart($userId);
+    if (!$validation['valid']) {
+        foreach ($validation['errors'] as $e) {
+            \flash('error', $e);
+        }
+        return $this->redirect('/cart');
+    }
+
+    // ----- COUPON LOGIC -----
+    $couponModel    = new Coupon();
+    $couponId       = null;
+    $discountAmount = 0.0;
+    $couponUsed     = null;
+
+    if ($couponCode !== '') {
+        $couponUsed = $couponModel->findByCode($couponCode);
+    }
+
+    if ($couponUsed) {
+        // Recalculate with coupon
+        $totals = $this->cartModel->calculateTotals($userId, $couponUsed);
+        $couponId       = (int)$couponUsed['id'];
+        $discountAmount = (float)$totals['discount'];
+    } else {
+        // No valid coupon
+        $totals = $this->cartModel->calculateTotals($userId, null);
+        $couponCode = null; // do not save empty code
+    }
+
+    // Normalise totals keys expected by createOrder()
+    $totals = [
+        'subtotal' => (float)$totals['subtotal'],
+        'discount' => (float)($totals['discount'] ?? 0),
+        'shipping' => (float)($totals['shipping'] ?? 0),
+        'total'    => (float)$totals['total'],
+    ];
+
+    // Create order with coupon info
+    $orderId = $this->orderModel->createOrder(
+        $userId,
+        $cartItems,
+        $address,
+        $totals,
+        $couponId,
+        $couponCode,
+        $discountAmount
+    );
+
+    if (!$orderId) {
+        \flash('error', 'Failed to place order');
+        return $this->redirect('/checkout');
+    }
+
+    // Record coupon usage
+    if ($couponUsed && $couponId) {
+        $couponModel->recordUsage($couponId, $userId, $orderId);
+    }
+
+    // Clear cart
+    $this->cartModel->clearCart($userId);
+
+    $order = $this->orderModel->getOrderById($orderId);
+
+    return $this->redirect('/checkout/success/' . $order['order_number']);
+}
+
+/**
+ * Order success page
+ */
+public function success($orderNumber)
+{
+    if (!\isLoggedIn()) {
+        return $this->redirect('/login');
+    }
+
+    $order = $this->orderModel->getOrderByNumber($orderNumber, userId());
+
+    if (!$order) {
+        \flash('error', 'Order not found');
+        return $this->redirect('/account/orders');
+    }
+
+    $items = $this->orderModel->getOrderItems($order['id']);
+
+    $this->view('checkout/success.twig', [
+        'title'       => 'Order Placed Successfully',
+        'order'       => $order,
+        'order_items' => $items,
+    ]);
+}
+
 }

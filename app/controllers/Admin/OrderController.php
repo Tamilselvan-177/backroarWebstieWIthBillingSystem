@@ -18,9 +18,10 @@ class OrderController extends BaseController
         }
         $this->orders = new Order();
     }
-public function countOpen() {
-    return count($this->all(['status' => ['pending', 'processing']]));
-}
+
+    public function countOpen() {
+        return count($this->all(['status' => ['pending', 'processing']]));
+    }
 
     public function index()
     {
@@ -43,6 +44,35 @@ public function countOpen() {
         ]);
     }
 
+    // NEW: Show order details with user info and delivery address
+    public function show($id)
+    {
+        $orderId = (int)$id;
+        
+        // Get order with user details
+        $sql = "SELECT o.*, u.name as user_name, u.email as user_email, u.phone as user_phone
+                FROM orders o
+                LEFT JOIN users u ON o.user_id = u.id
+                WHERE o.id = {$orderId}";
+        $order = $this->orders->query($sql);
+        $order = $order[0] ?? null;
+
+        if (!$order) {
+            \flash('error', 'Order not found');
+            return $this->redirect('/admin/orders');
+        }
+
+        // Get order items
+        $itemSql = "SELECT * FROM order_items WHERE order_id = {$orderId}";
+        $items = $this->orders->query($itemSql);
+
+        $this->view('admin/orders/show.twig', [
+            'title' => 'Order Details',
+            'order' => $order,
+            'items' => $items
+        ]);
+    }
+
     public function updateStatus($id)
     {
         $status = $_POST['order_status'] ?? null;
@@ -56,4 +86,3 @@ public function countOpen() {
         return $this->redirect('/admin/orders');
     }
 }
-

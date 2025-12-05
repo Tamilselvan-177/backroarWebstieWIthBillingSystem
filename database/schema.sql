@@ -377,3 +377,52 @@ CREATE TABLE payment_logs (
     INDEX idx_order (order_id),
     INDEX idx_transaction (transaction_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+-- change of Db to add the coupons table 
+
+-- COUPONS TABLE
+CREATE TABLE coupons (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    type ENUM('PERCENT', 'FIXED') NOT NULL,
+    value DECIMAL(10,2) NOT NULL,
+    max_discount_amount DECIMAL(10,2) DEFAULT NULL,
+    min_order_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    valid_from TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    valid_to TIMESTAMP NOT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    usage_limit_global INT UNSIGNED DEFAULT NULL,
+    usage_limit_per_user INT UNSIGNED DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_code (code),
+    INDEX idx_active (is_active),
+    INDEX idx_dates (valid_from, valid_to),
+    INDEX idx_usage_global (usage_limit_global)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- COUPON USAGES (tracks usage for limits)
+CREATE TABLE coupon_usages (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    coupon_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    order_id INT UNSIGNED NULL,
+    used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+    INDEX idx_coupon_user (coupon_id, user_id),
+    INDEX idx_user (user_id),
+    INDEX idx_coupon (coupon_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ADD COLUMNS TO ORDERS TABLE
+ALTER TABLE orders 
+ADD COLUMN coupon_id INT UNSIGNED NULL,
+ADD COLUMN coupon_code VARCHAR(50) NULL,
+ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0,
+ADD FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE SET NULL,
+ADD INDEX idx_coupon (coupon_id),
+ADD INDEX idx_coupon_code (coupon_code);

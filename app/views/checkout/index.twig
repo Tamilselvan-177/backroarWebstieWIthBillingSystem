@@ -111,6 +111,24 @@
                     </div>
                 </div>
 
+                <!-- PROMO CODE SECTION -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-bold mb-4 text-[var(--brand-text)]">Promo Code</h2>
+                    <div class="flex gap-2">
+<input type="text"
+       id="couponCode"
+       placeholder="Enter coupon code (e.g. WELCOME10)"
+       class="flex-1 px-4 py-2 border border-[var(--card-border)] rounded-lg outline-none focus:ring-2 focus:ring-[var(--brand-primary)]">
+
+                        <button type="button"
+                                id="applyCouponBtn"
+                                class="px-6 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary-hover)] font-semibold transition-colors">
+                            Apply
+                        </button>
+                    </div>
+                    <div id="couponMessage" class="mt-2 text-sm"></div>
+                </div>
+
                 <!-- Payment Method -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <h2 class="text-xl font-bold mb-6 text-[var(--brand-text)]">Payment Method</h2>
@@ -146,7 +164,7 @@
                         <div class="flex gap-3">
                             <div class="w-16 h-16 bg-[var(--card-bg-alt)] rounded overflow-hidden flex-shrink-0">
                                 {% if item.image_path %}
-<img src="{{ item.image_path }}" alt="{{ item.product_name }}" class="w-full h-full object-contain">
+                                <img src="{{ item.image_path }}" alt="{{ item.product_name }}" class="w-full h-full object-contain">
                                 {% else %}
                                 <div class="w-full h-full flex items-center justify-center text-2xl">📦</div>
                                 {% endif %}
@@ -165,7 +183,7 @@
                     <div class="border-t border-[var(--card-border)] pt-4 space-y-3">
                         <div class="flex justify-between text-gray-600">
                             <span>Subtotal</span>
-                            <span class="font-semibold">₹{{ totals.subtotal|number_format(2) }}</span>
+                            <span class="font-semibold" data-subtotal>₹{{ totals.subtotal|number_format(2) }}</span>
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>Shipping</span>
@@ -175,22 +193,34 @@
                             <span class="font-semibold">₹{{ totals.shipping|number_format(2) }}</span>
                             {% endif %}
                         </div>
+                        {% if totals.discount > 0 %}
+                        <div class="flex justify-between text-green-600 font-semibold" data-discount-row>
+                            <span>Discount</span>
+                            <span>-₹<span data-discount-amount>{{ totals.discount|number_format(2) }}</span></span>
+                        </div>
+                        {% else %}
+                        <div class="flex justify-between text-green-600 font-semibold hidden" data-discount-row>
+                            <span>Discount</span>
+                            <span>-₹<span data-discount-amount>0.00</span></span>
+                        </div>
+                        {% endif %}
                         <div class="border-t border-[var(--card-border)] pt-3">
                             <div class="flex justify-between text-lg font-bold text-[var(--brand-text)]">
                                 <span>Total</span>
-                                <span>₹{{ totals.total|number_format(2) }}</span>
+                                <span data-total>₹{{ totals.total|number_format(2) }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Place Order Form (Separate, Clean Form) -->
+                    <!-- Place Order Form -->
                     {% if addresses|length > 0 %}
-                    <form method="POST" action="{{ app_url }}/checkout/place-order" id="checkoutForm">
-                        <input type="hidden" name="_token" value="{{ csrf_token }}">
-                        <button type="submit" id="placeOrderBtn" class="w-full mt-6 px-6 py-3 bg-[var(--brand-primary)] text-white bg-black rounded-lg font-bold hover:bg-[var(--brand-primary-hover)] transition-colors">
-                            Place Order
-                        </button>
-                    </form>
+                 <form method="POST" action="{{ app_url }}/checkout/place-order" id="checkoutForm">
+    <input type="hidden" name="_token" value="{{ csrf_token }}">
+    <input type="hidden" name="coupon_code" id="couponCodeApplied" value="">
+    <button type="submit" id="placeOrderBtn" class="w-full mt-6 px-6 py-3 bg-[var(--brand-primary)] text-white bg-black rounded-lg font-bold hover:bg-[var(--brand-primary-hover)] transition-colors">
+        Place Order
+    </button>
+</form>
                     {% else %}
                     <p class="text-sm text-gray-600 text-center mt-6">Please add a delivery address to continue</p>
                     {% endif %}
@@ -207,14 +237,17 @@
 {% endif %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const csrfToken = '{{ csrf_token }}';
-    const appUrl = '{{ app_url|e("js") }}';
+    const csrfToken       = '{{ csrf_token }}';
+    const appUrl          = '{{ app_url|e("js") }}';
     const razorpayEnabled = {{ razorpay_enabled ? 'true' : 'false' }};
-    const saveBtn = document.getElementById('saveAddressBtn');
-    const checkoutForm = document.getElementById('checkoutForm');
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    const defaultBtnText = placeOrderBtn ? placeOrderBtn.textContent : '';
-    const customerData = {
+    const saveBtn         = document.getElementById('saveAddressBtn');
+    const checkoutForm    = document.getElementById('checkoutForm');
+    const placeOrderBtn   = document.getElementById('placeOrderBtn');
+    const couponBtn       = document.getElementById('applyCouponBtn');
+    const couponInput     = document.getElementById('couponCode');
+    const couponMessage   = document.getElementById('couponMessage');
+    const defaultBtnText  = placeOrderBtn ? placeOrderBtn.textContent : '';
+    const customerData    = {
         name: '{{ customer.name|default(session.user_name)|e("js") }}',
         email: '{{ customer.email|default(session.user_email)|e("js") }}',
         contact: '{{ customer.phone|default('')|e("js") }}'
@@ -231,6 +264,71 @@ document.addEventListener('DOMContentLoaded', function() {
         return selected ? selected.value : null;
     }
 
+    // COUPON APPLY FUNCTIONALITY
+    if (couponBtn && couponInput) {
+        couponBtn.addEventListener('click', async function() {
+            const code = couponInput.value.trim();
+            if (!code) {
+                couponMessage.innerHTML = '<span class="text-red-600">Please enter a coupon code</span>';
+                return;
+            }
+
+            couponBtn.disabled = true;
+            const oldText = couponBtn.textContent;
+            couponBtn.textContent = 'Applying...';
+            couponMessage.innerHTML = '';
+
+            try {
+                const response = await fetch(appUrl + '/checkout/apply-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        coupon_code: code,
+                        _token: csrfToken
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+    const subtotalEl = document.querySelector('[data-subtotal]');
+    const totalEl    = document.querySelector('[data-total]');
+    const discountRow = document.querySelector('[data-discount-row]');
+    const discountAmt = document.querySelector('[data-discount-amount]');
+
+    if (subtotalEl) {
+        subtotalEl.textContent = '₹' + Number(data.totals.subtotal).toFixed(2);
+    }
+    if (totalEl) {
+        totalEl.textContent = '₹' + Number(data.totals.total).toFixed(2);
+    }
+    if (discountRow && discountAmt) {
+        discountRow.classList.remove('hidden');
+        discountAmt.textContent = Number(data.totals.discount).toFixed(2);
+    }
+
+    // ✅ ADD THIS: Store the applied coupon code in the hidden field
+    const hiddenCouponInput = document.getElementById('couponCodeApplied');
+    if (hiddenCouponInput) {
+        hiddenCouponInput.value = code;
+    }
+
+    couponMessage.innerHTML =
+        `<span class="text-green-600 font-semibold">✓ ${data.message} (₹${Number(data.totals.discount).toFixed(2)} saved)</span>`;
+} else {
+    couponMessage.innerHTML = `<span class="text-red-600">${data.message}</span>`;
+}
+
+            } catch (error) {
+                couponMessage.innerHTML = '<span class="text-red-600">Network error. Please try again.</span>';
+            }
+
+            couponBtn.disabled = false;
+            couponBtn.textContent = oldText;
+        });
+    }
+
+    // Existing Razorpay + address code --------------------
     function submitVerificationForm(response, orderNumber) {
         const form = document.createElement('form');
         form.method = 'POST';
@@ -292,12 +390,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     email: customerData.email || '',
                     contact: customerData.contact || ''
                 },
-                notes: {
-                    order_number: data.order_number
-                },
-                theme: {
-                    color: '#1A1A1A'
-                },
+                notes: { order_number: data.order_number },
+                theme: { color: '#1A1A1A' },
                 handler: function (paymentResponse) {
                     toggleButtonLoading(true, 'Verifying...');
                     submitVerificationForm(paymentResponse, data.order_number);
@@ -360,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             const paymentMethodEl = document.querySelector('input[name="payment_method"]:checked');
-            const paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'COD';
+            const paymentMethod   = paymentMethodEl ? paymentMethodEl.value : 'COD';
             if (paymentMethod === 'RAZORPAY') {
                 e.preventDefault();
                 startRazorpayFlow(addressId);

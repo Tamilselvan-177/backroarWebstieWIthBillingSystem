@@ -140,6 +140,15 @@
                                 </button>
                             </form>
                         </td>
+                        <td class="p-3 align-top">
+    <a href="{{ app_url }}/admin/orders/{{ o.id }}/show" 
+       style="color: #2196F3; text-decoration: none; font-weight: 500;">
+        {{ o.order_number }}
+    </a>
+    <div class="text-[11px] text-gray-500">
+        {{ o.created_at|date('d M Y H:i') }}
+    </div>
+</td>
                     </tr>
                 {% else %}
                     <tr>

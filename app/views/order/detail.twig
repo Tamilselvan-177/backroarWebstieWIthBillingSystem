@@ -43,6 +43,12 @@
                     {% elseif order.order_status == 'Cancelled' %}
                         <span class="px-4 py-2 bg-red-100 text-red-800 rounded-full font-semibold">Cancelled</span>
                     {% endif %}
+
+                    {% if order.coupon_code %}
+                        <span class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold">
+                            Coupon: {{ order.coupon_code }}
+                        </span>
+                    {% endif %}
                 </div>
             </div>
 
@@ -116,6 +122,14 @@
                     <span>Subtotal</span>
                     <span class="font-semibold">₹{{ order.subtotal|number_format(2) }}</span>
                 </div>
+
+                {% if order.discount_amount > 0 %}
+                <div class="flex justify-between text-green-600 font-semibold">
+                    <span>Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</span>
+                    <span>-₹{{ order.discount_amount|number_format(2) }}</span>
+                </div>
+                {% endif %}
+
                 <div class="flex justify-between text-gray-600">
                     <span>Shipping Charge</span>
                     {% if order.shipping_charge == 0 %}
@@ -124,6 +138,7 @@
                     <span class="font-semibold">₹{{ order.shipping_charge|number_format(2) }}</span>
                     {% endif %}
                 </div>
+
                 <div class="border-t border-[var(--card-border)] pt-2">
                     <div class="flex justify-between text-lg font-bold text-[var(--brand-text)]">
                         <span>Total Amount</span>

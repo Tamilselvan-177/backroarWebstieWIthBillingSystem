@@ -19,7 +19,7 @@
             <!-- Order Details -->
             <div class="bg-[var(--card-bg-alt)] rounded-lg p-6 mb-6 text-left">
                 <h2 class="text-xl font-bold mb-4 text-[var(--brand-text)]">Order Details</h2>
-                <div class="space-y-2">
+                <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Order Number:</span>
                         <span class="font-semibold">{{ order.order_number }}</span>
@@ -29,12 +29,40 @@
                         <span class="font-semibold">{{ order.created_at|date('d M Y, h:i A') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Total Amount:</span>
-                        <span class="font-bold text-lg text-[var(--brand-primary)]">₹{{ order.total_amount|number_format(2) }}</span>
-                    </div>
-                    <div class="flex justify-between">
                         <span class="text-gray-600">Payment Method:</span>
                         <span class="font-semibold">{{ order.payment_method }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order Status:</span>
+                        <span class="font-semibold">{{ order.order_status }}</span>
+                    </div>
+                    {% if order.coupon_code %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Coupon Applied:</span>
+                        <span class="font-semibold">{{ order.coupon_code }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Price breakdown -->
+                <div class="mt-4 border-t border-[var(--card-border)] pt-3 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-semibold">₹{{ order.subtotal|number_format(2) }}</span>
+                    </div>
+                    {% if order.discount_amount > 0 %}
+                    <div class="flex justify-between text-green-600">
+                        <span>Discount ({{ order.coupon_code }})</span>
+                        <span>-₹{{ order.discount_amount|number_format(2) }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Shipping</span>
+                        <span class="font-semibold">₹{{ order.shipping_charge|number_format(2) }}</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-[var(--card-border)] text-lg font-bold text-[var(--brand-primary)]">
+                        <span>Total Paid</span>
+                        <span>₹{{ order.total_amount|number_format(2) }}</span>
                     </div>
                 </div>
             </div>
@@ -44,7 +72,9 @@
                 <h3 class="font-bold mb-3 text-[var(--brand-text)]">Delivery Address</h3>
                 <p class="text-gray-700">{{ order.shipping_name }}</p>
                 <p class="text-gray-600 text-sm">{{ order.shipping_address }}</p>
-                <p class="text-gray-600 text-sm">{{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}</p>
+                <p class="text-gray-600 text-sm">
+                    {{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_pincode }}
+                </p>
                 <p class="text-gray-600 text-sm">Phone: {{ order.shipping_phone }}</p>
             </div>
 
@@ -56,14 +86,16 @@
                     <div class="flex gap-3">
                         <div class="w-16 h-16 bg-white rounded overflow-hidden flex-shrink-0">
                             {% if item.image_path %}
-<img src="{{ item.image_path }}" alt="{{ item.product_name }}" class="w-full h-full object-contain">
+                            <img src="{{ item.image_path }}" alt="{{ item.product_name }}" class="w-full h-full object-contain">
                             {% else %}
                             <div class="w-full h-full flex items-center justify-center text-2xl">📦</div>
                             {% endif %}
                         </div>
                         <div class="flex-1">
                             <p class="font-semibold text-sm">{{ item.product_name }}</p>
-                            <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × ₹{{ item.price|number_format(2) }}</p>
+                            <p class="text-xs text-gray-500">
+                                Qty: {{ item.quantity }} × ₹{{ item.price|number_format(2) }}
+                            </p>
                             <p class="text-sm font-bold mt-1">₹{{ item.subtotal|number_format(2) }}</p>
                         </div>
                     </div>

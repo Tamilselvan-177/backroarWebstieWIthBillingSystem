@@ -19,6 +19,7 @@ use App\Controllers\Admin\ModelController as AdminModelController;
 use App\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Controllers\WishlistController;
 use App\Controllers\Admin\SubcategoryController;
+use App\Controllers\Admin\AdminCouponController;
 // ============================================================
 // HOME & MAIN ROUTES
 // ============================================================
@@ -124,6 +125,7 @@ $router->post('/admin/products/{id}/images/reorder', AdminImageController::class
 // ADMIN ORDERS
 $router->get('/admin/orders', AdminOrderController::class, 'index');
 $router->post('/admin/orders/{id}/status', AdminOrderController::class, 'updateStatus');
+$router->get('/admin/orders/{id}/show', AdminOrderController::class, 'show');
 
 // ADMIN CATEGORIES
 $router->get('/admin/categories', AdminCategoryController::class, 'index');
@@ -165,3 +167,15 @@ $router->get('/admin/subcategories/{id}/edit', SubcategoryController::class, 'ed
 $router->post('/admin/subcategories/{id}', SubcategoryController::class, 'update');
 $router->post('/admin/subcategories/{id}/delete', SubcategoryController::class, 'delete');
 $router->post('/admin/subcategories/{id}/toggleActive', SubcategoryController::class, 'toggleActive');
+
+$router->post('/checkout/apply-coupon', CheckoutController::class, 'applyCoupon');
+
+// coupon management routes
+
+$router->get('/admin/coupons', AdminCouponController::class, 'index');
+$router->get('/admin/coupons/create', AdminCouponController::class, 'create');
+$router->post('/admin/coupons/store', AdminCouponController::class, 'store');
+$router->get('/admin/coupons/{id}/edit', AdminCouponController::class, 'edit');
+$router->post('/admin/coupons/{id}/update', AdminCouponController::class, 'update');
+$router->post('/admin/coupons/{id}/delete', AdminCouponController::class, 'delete');
+$router->post('/admin/coupons/{id}/toggle', AdminCouponController::class, 'toggleStatus');

@@ -119,14 +119,15 @@
             </div>
         </div>
 
-        <!-- Quick stats (static placeholders; hook to real data later if you want) -->
+        <!-- Quick stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <div class="admin-card p-5 flex items-center justify-between">
                 <div>
                     <p class="admin-stat-label mb-1">Total Products</p>
-<p class="text-2xl font-bold text-[var(--brand-text)]">
-{{ stats.total_products }}
-</p>                </div>
+                    <p class="text-2xl font-bold text-[var(--brand-text)]">
+                        {{ stats.total_products }}
+                    </p>
+                </div>
                 <div class="text-gray-400">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -137,9 +138,9 @@
             <div class="admin-card p-5 flex items-center justify-between">
                 <div>
                     <p class="admin-stat-label mb-1">Open Orders</p>
-<p class="text-2xl font-bold text-[var(--brand-text)]">
-    {{ stats.open_orders }}
-</p>
+                    <p class="text-2xl font-bold text-[var(--brand-text)]">
+                        {{ stats.open_orders }}
+                    </p>
                 </div>
                 <div class="text-gray-400">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,9 +152,9 @@
             <div class="admin-card p-5 flex items-center justify-between">
                 <div>
                     <p class="admin-stat-label mb-1">Total Reviews</p>
-<p class="text-2xl font-bold text-[var(--brand-text)]">
-    {{ stats.total_review }}
-</p>
+                    <p class="text-2xl font-bold text-[var(--brand-text)]">
+                        {{ stats.total_review }}
+                    </p>
                 </div>
                 <div class="text-gray-400">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,19 +205,19 @@
                     Edit categories →
                 </p>
             </a>
-            <a href="{{ app_url }}/admin/subcategories" class="admin-card p-6 hover:no-underline">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="admin-card-title">Subcategories</h3>
-        <span class="text-xs px-2 py-1 rounded-full bg-black text-white">Structure</span>
-    </div>
-    <p class="admin-card-sub mb-4">
-        Manage mobile case types, gadgets types and other subcategories.
-    </p>
-    <p class="text-xs uppercase tracking-[0.16em] text-gray-400">
-        Manage subcategories →
-    </p>
-</a>
 
+            <a href="{{ app_url }}/admin/subcategories" class="admin-card p-6 hover:no-underline">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="admin-card-title">Subcategories</h3>
+                    <span class="text-xs px-2 py-1 rounded-full bg-black text-white">Structure</span>
+                </div>
+                <p class="admin-card-sub mb-4">
+                    Manage mobile case types, gadgets types and other subcategories.
+                </p>
+                <p class="text-xs uppercase tracking-[0.16em] text-gray-400">
+                    Manage subcategories →
+                </p>
+            </a>
 
             <a href="{{ app_url }}/admin/brands" class="admin-card p-6 hover:no-underline">
                 <div class="flex items-center justify-between mb-4">
@@ -241,6 +242,19 @@
                 </p>
                 <p class="text-xs uppercase tracking-[0.16em] text-gray-400">
                     Configure models →
+                </p>
+            </a>
+
+            <a href="{{ app_url }}/admin/coupons" class="admin-card p-6 hover:no-underline">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="admin-card-title">Coupons</h3>
+                    <span class="text-xs px-2 py-1 rounded-full bg-black text-white">Marketing</span>
+                </div>
+                <p class="admin-card-sub mb-4">
+                    Create and manage discount codes for promotions.
+                </p>
+                <p class="text-xs uppercase tracking-[0.16em] text-gray-400">
+                    Manage coupons →
                 </p>
             </a>
 

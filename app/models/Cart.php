@@ -144,6 +144,53 @@ class Cart extends BaseModel
             'total' => $subtotal
         ];
     }
+/**
+ * Calculate totals with optional coupon
+ */
+public function calculateTotals($userId, $coupon = null)
+{
+    $items = $this->getCartItems($userId);
+
+    $subtotal = 0;
+
+    foreach ($items as $item) {
+        $price = $item['sale_price'] ?? $item['price'];
+        $subtotal += $price * $item['quantity'];
+    }
+
+    $discount = 0;
+
+    // If coupon applied
+    if ($coupon) {
+
+        // Check min order amount
+        if ($subtotal >= $coupon['min_order_amount']) {
+
+            // Percent coupon
+            if ($coupon['type'] === 'PERCENT') {
+                $discount = ($subtotal * $coupon['value'] / 100);
+
+                // Apply max cap
+                if (!empty($coupon['max_discount_amount'])) {
+                    $discount = min($discount, $coupon['max_discount_amount']);
+                }
+
+            } else { // Fixed amount coupon
+                $discount = $coupon['value'];
+            }
+
+            // Prevent negative total
+            $discount = min($discount, $subtotal);
+        }
+    }
+
+    return [
+        'subtotal' => $subtotal,
+        'discount' => $discount,
+        'total' => $subtotal - $discount,
+        'shipping' => 0
+    ];
+}
 
     /**
      * Check if item exists in cart
@@ -186,4 +233,5 @@ class Cart extends BaseModel
             'errors' => $errors
         ];
     }
+    
 }
