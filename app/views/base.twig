@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}BlackRoar — Mobile Cases & Accessories{% endblock %}</title>
+    <title>{% block title %}BackRoar — Mobile Cases & Accessories{% endblock %}</title>
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -368,12 +368,12 @@
             <!-- Logo -->
             <div class="logo-wrapper">
                 <img src="{{ app_url }}/public/images/logo.png" 
-                     alt="BlackRoar" 
+                     alt="BackRoar" 
                      class="logo-image">
             </div>
             
             <!-- Brand Text -->
-            <div class="brand-text">BlackRoar</div>
+            <div class="brand-text">BackRoar</div>
         </div>
     </div>
     <!-- ========== END MARVEL INTRO ========== -->
@@ -392,11 +392,11 @@
                         </svg>
                     </button>
                     <a href="{{ app_url }}/" class="flex items-center gap-2">
-                        <img src="{{ app_url }}/public/images/logo.png" alt="BlackRoar" class="w-50 h-10 square" />
+                        <img src="{{ app_url }}/public/images/logo.png" alt="BackRoar" class="w-50 h-10 square" />
                     </a>
                     <span class="hidden md:inline-flex nav-chip ml-1">
                         <span class="dot"></span>
-                        <span>Black&nbsp;Roar</span>
+                        <span>Back&nbsp;Roar</span>
                     </span>
                 </div>
 
@@ -515,7 +515,77 @@
 
         {% block content %}{% endblock %}
 
-        <!-- Footer: keep your existing footer here -->
+      <footer class="bg-black text-white py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+
+            <!-- Useful Links -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">USEFUL LINKS</h4>
+                <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">Love from the Customers</a></li>
+
+                    <!-- About & Contact DO NOT EXIST in routes — if you add routes, this becomes correct -->
+                    <li><a href="{{ app_url }}/about" class="hover:text-white">About Us</a></li>
+                    <li><a href="{{ app_url }}/contact" class="hover:text-white">Contact Us</a></li>
+
+                    <!-- These routes DO NOT EXIST unless you add them manually -->
+                    <li><a href="{{ app_url }}/refund-policy" class="hover:text-white">Refund Policy</a></li>
+                    <li><a href="{{ app_url }}/privacy-policy" class="hover:text-white">Privacy Policy</a></li>
+                    <li><a href="{{ app_url }}/shipping-policy" class="hover:text-white">Shipping Policy</a></li>
+                    <li><a href="{{ app_url }}/terms" class="hover:text-white">Terms and Conditions</a></li>
+                </ul>
+            </div>
+
+            <!-- Account -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">ACCOUNT</h4>
+                <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="{{ app_url }}/orders" class="hover:text-white">My Orders</a></li>
+                    <li><a href="{{ app_url }}/account" class="hover:text-white">My Account</a></li>
+                    <li><a href="{{ app_url }}/orders" class="hover:text-white">Track Order</a></li>
+                    <li><a href="{{ app_url }}/checkout" class="hover:text-white">Checkout</a></li>
+                </ul>
+            </div>
+
+            <!-- Help Center -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">HELP CENTER</h4>
+                <div class="w-12 h-1 bg-green-500 mb-4"></div>
+
+                <p class="text-gray-400 mb-2">
+                    Support time : 09.30 AM to 06.00 PM (Monday to Saturday)
+                </p>
+                <p class="text-gray-400 mb-4">Contact@backroar.in</p>
+
+                <h5 class="font-semibold mb-2">Connect with us</h5>
+                <div class="flex space-x-4 text-gray-400">
+                    <a href="#" class="hover:text-white">FB</a>
+                    <a href="#" class="hover:text-white">IG</a>
+                </div>
+            </div>
+
+            <!-- Office Address -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">REGISTERED OFFICE ADDRESS:</h4>
+                <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                <p class="text-gray-400">Backroar</p>
+                <p class="text-gray-400">503 Rhythm Plaza</p>
+                <p class="text-gray-400">Nikol Ringroad</p>
+                <p class="text-gray-400">Ahmedabad Gujarat - 382350</p>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
+            <p>Copyright 2025 © Backroar.in</p>
+            <div class="flex gap-2 mt-4 md:mt-0">
+                <img src="{{ app_url }}/public/images/final_payments_icon.png" alt="Payment Methods" class="h-6">
+            </div>
+        </div>
+    </div>
+</footer>
 
     </div>
     <!-- ========== END MAIN CONTENT WRAPPER ========== -->
