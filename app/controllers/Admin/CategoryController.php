@@ -60,7 +60,9 @@ class CategoryController extends BaseController
         $imagePath = null;
 
         if (!empty($_FILES['image']['name'])) {
-            $uploadDir = __DIR__ . '/../../../public/images/categories/';
+            $appCfg = require dirname(__DIR__, 2) . '/config/app.php';
+            $basePath = rtrim($appCfg['images']['base_path'] ?? (dirname(__DIR__, 3) . '/images'), DIRECTORY_SEPARATOR);
+            $uploadDir = $basePath . DIRECTORY_SEPARATOR . 'categories' . DIRECTORY_SEPARATOR;
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
             $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
@@ -68,7 +70,8 @@ class CategoryController extends BaseController
             $targetPath = $uploadDir . $fileName;
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                $imagePath = 'images/categories/' . $fileName;
+                $baseUrl = '/' . trim($appCfg['images']['base_url'] ?? '/images', '/');
+                $imagePath = $baseUrl . '/categories/' . $fileName;
             }
         }
 
@@ -129,13 +132,14 @@ class CategoryController extends BaseController
         $imagePath = $category['image_path']; // keep old image
 
         if (!empty($_FILES['image']['name'])) {
-
-            $uploadDir = __DIR__ . '/../../../public/images/categories/';
+            $appCfg = require dirname(__DIR__, 2) . '/config/app.php';
+            $basePath = rtrim($appCfg['images']['base_path'] ?? (dirname(__DIR__, 3) . '/images'), DIRECTORY_SEPARATOR);
+            $uploadDir = $basePath . DIRECTORY_SEPARATOR . 'categories' . DIRECTORY_SEPARATOR;
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
-            // delete old file
-            if ($imagePath && file_exists(__DIR__ . '/../../../public/' . $imagePath)) {
-                unlink(__DIR__ . '/../../../public/' . $imagePath);
+            if ($imagePath) {
+                $abs = \App\Helpers\ImageUploader::toAbsolutePath($imagePath);
+                if (is_file($abs)) unlink($abs);
             }
 
             $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
@@ -143,7 +147,8 @@ class CategoryController extends BaseController
             $targetPath = $uploadDir . $fileName;
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                $imagePath = 'images/categories/' . $fileName;
+                $baseUrl = '/' . trim($appCfg['images']['base_url'] ?? '/images', '/');
+                $imagePath = $baseUrl . '/categories/' . $fileName;
             }
         }
 
@@ -166,10 +171,9 @@ class CategoryController extends BaseController
         $category = $this->categories->find($id);
 
         if ($category) {
-            // delete image file
             if (!empty($category['image_path'])) {
-                $file = __DIR__ . '/../../../public/' . $category['image_path'];
-                if (file_exists($file)) unlink($file);
+                $file = \App\Helpers\ImageUploader::toAbsolutePath($category['image_path']);
+                if (is_file($file)) unlink($file);
             }
 
             $this->categories->delete($id);

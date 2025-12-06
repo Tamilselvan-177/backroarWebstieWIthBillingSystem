@@ -101,10 +101,120 @@
     .print-btn:hover {
         background: #1976D2;
     }
+
+    /* Print Styles */
+    @page { size: A4; margin: 10mm; }
+    .print-label { display: none; }
+    
     @media print {
-        .no-print { display: none; }
-        body { background: white; }
-        .admin-shell { background: white; }
+        .no-print { display: none !important; }
+        body { background: white !important; margin: 0 !important; padding: 0 !important; }
+        .admin-shell { display: none !important; }
+        .admin-panel { display: none !important; }
+        
+        .print-label { 
+            display: block !important; 
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            page-break-after: avoid !important;
+        }
+        
+        .print-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #000;
+        }
+        
+        .print-header > div:first-child { 
+            font-size: 18px !important; 
+            font-weight: 700 !important; 
+        }
+        
+        .print-header > div:last-child { 
+            font-size: 11px !important; 
+        }
+        
+        .print-box { 
+            border: 1px solid #d1d5db; 
+            border-radius: 6px; 
+            padding: 10px; 
+            background: #fff; 
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+        }
+        
+        .print-box-label {
+            font-size: 9px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #4b5563 !important;
+            margin-bottom: 5px;
+            font-weight: 700 !important;
+            display: block;
+        }
+        
+        .print-items { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+            margin-top: 8px; 
+        }
+        
+        .print-item { 
+            display: flex; 
+            gap: 6px; 
+            align-items: center; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 4px; 
+            padding: 6px;
+            page-break-inside: avoid;
+        }
+        
+        .thumb { 
+            width: 42px; 
+            height: 42px; 
+            background: #f3f4f6; 
+            border-radius: 4px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .thumb img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+        }
+        
+        .print-label * { 
+            color: #000 !important; 
+            font-size: 10px !important;
+        }
+        
+        .print-total {
+            font-size: 12px !important;
+            font-weight: 700 !important;
+        }
+
+        .print-status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 9px !important;
+            font-weight: 600 !important;
+            margin-left: 6px;
+        }
+
+        .discount-row {
+            color: #059669 !important;
+        }
     }
 </style>
 {% endblock %}
@@ -218,7 +328,23 @@
                     <tbody>
                         {% for item in items %}
                         <tr>
-                            <td>{{ item.product_name }}</td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:.75rem;">
+                                    <div style="width:52px; height:52px; border-radius:.5rem; background:#f3f4f6; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                        {% if item.image_path %}
+                                        <img src="{{ item.image_path }}" alt="{{ item.product_name }}" style="width:100%; height:100%; object-fit:contain;" />
+                                        {% else %}
+                                        <span>📦</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:600;">{{ item.product_name }}</div>
+                                        {% if item.product_slug %}
+                                        <div style="font-size:.8rem; color:#6b7280;">/{{ item.product_slug }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
                             <td style="text-align: center;">{{ item.quantity }}</td>
                             <td>₹{{ item.price|number_format(2) }}</td>
                             <td><strong>₹{{ item.subtotal|number_format(2) }}</strong></td>
@@ -281,6 +407,87 @@
             <a href="{{ app_url }}/admin/orders" style="color: #2196F3; text-decoration: none; font-weight: 500;">
                 ← Back to Orders
             </a>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Print Label -->
+<section class="print-label">
+    <div class="print-header">
+        <div>Order #{{ order.order_number }}
+            {% set s = order.order_status %}
+            {% if s == 'Shipped' %}
+                <span class="print-status-badge" style="background:#e0f2fe; color:#0369a1;">SHIPPED</span>
+            {% elseif s == 'Delivered' %}
+                <span class="print-status-badge" style="background:#d1fae5; color:#065f46;">DELIVERED</span>
+            {% elseif s == 'Processing' %}
+                <span class="print-status-badge" style="background:#e0e7ff; color:#4338ca;">PROCESSING</span>
+            {% endif %}
+        </div>
+        <div>{{ order.created_at|date('d M Y, H:i') }}</div>
+    </div>
+    
+    <div class="print-box">
+        <span class="print-box-label">🙍 CUSTOMER</span>
+        <div style="font-weight:700; font-size:11px !important;">{{ order.shipping_name }}</div>
+        <div style="font-size:10px !important;">📞 {{ order.user_phone ?? order.shipping_phone }}</div>
+        {% if order.user_email %}
+        <div style="font-size:9px !important; color:#6b7280 !important;">✉ {{ order.user_email }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="print-box">
+        <span class="print-box-label">📍 DELIVERY ADDRESS</span>
+        <div style="font-size:10px !important; line-height:1.5;">
+            {{ order.shipping_address }}{% if order.shipping_address_line2 %}, {{ order.shipping_address_line2 }}{% endif %}<br>
+            {{ order.shipping_city }}, {{ order.shipping_state }} - <strong>{{ order.shipping_pincode }}</strong>
+        </div>
+        <div style="margin-top:5px; font-size:9px !important; color:#6b7280 !important;">
+            💳 {{ order.payment_method ?? 'COD' }} • {{ order.payment_status }}
+        </div>
+    </div>
+    
+    <div class="print-box">
+        <span class="print-box-label">📦 ORDER ITEMS</span>
+        <div class="print-items">
+            {% for item in items %}
+            <div class="print-item">
+                <div class="thumb">
+                    {% if item.image_path %}
+                    <img src="{{ item.image_path }}" alt="{{ item.product_name }}" />
+                    {% else %}
+                    <span style="font-size:18px;">📦</span>
+                    {% endif %}
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:700; font-size:10px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.product_name }}</div>
+                    <div style="color:#6b7280 !important; font-size:9px !important;">Qty: {{ item.quantity }} × ₹{{ item.price|number_format(2) }}</div>
+                </div>
+                <div style="font-weight:700; white-space:nowrap; font-size:10px !important;">₹{{ item.subtotal|number_format(2) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="print-box">
+        <span class="print-box-label">💰 PAYMENT SUMMARY</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:10px !important;">
+            <span>Subtotal:</span>
+            <span>₹{{ order.subtotal|number_format(2) }}</span>
+        </div>
+        {% if order.discount_amount > 0 %}
+        <div class="discount-row" style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:10px !important; font-weight:600 !important;">
+            <span>🎉 Discount ({{ order.coupon_code }}):</span>
+            <span>-₹{{ order.discount_amount|number_format(2) }}</span>
+        </div>
+        {% endif %}
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:10px !important;">
+            <span>Shipping:</span>
+            <span>₹{{ order.shipping_charge|number_format(2) }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding-top:6px; border-top:2px solid #000; margin-top:4px;">
+            <span class="print-total">TOTAL AMOUNT:</span>
+            <span class="print-total">₹{{ order.total_amount|number_format(2) }}</span>
         </div>
     </div>
 </section>

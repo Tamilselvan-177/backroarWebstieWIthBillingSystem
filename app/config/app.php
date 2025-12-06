@@ -11,7 +11,7 @@ if (php_sapi_name() !== 'cli' && isset($_SERVER['HTTP_HOST'])) {
 }
 
 $appName = getenv('APP_NAME') ?: 'Mobile Backcase Store';
-$appUrl = getenv('APP_URL') ?: ($detectedUrl ?? 'http://localhost/ecommerce/public');
+$appUrl = getenv('APP_URL') ?: ($detectedUrl ?? 'http://localhost/ecommerce');
 $timezone = getenv('APP_TIMEZONE') ?: 'Asia/Kolkata';
 
 return [
@@ -22,7 +22,7 @@ return [
     // Image Settings
     'images' => [
         'base_path' => __DIR__ . '/../../public/images',
-        'base_url' => '/images',
+        'base_url' => '/public/images',
         'batch_size' => 1000,
         'max_width' => 1200,
         'max_size_kb' => 200,

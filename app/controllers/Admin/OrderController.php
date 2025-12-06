@@ -62,8 +62,11 @@ class OrderController extends BaseController
             return $this->redirect('/admin/orders');
         }
 
-        // Get order items
-        $itemSql = "SELECT * FROM order_items WHERE order_id = {$orderId}";
+        $itemSql = "SELECT oi.*, p.slug AS product_slug, pi.image_path
+                    FROM order_items oi
+                    LEFT JOIN products p ON oi.product_id = p.id
+                    LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
+                    WHERE oi.order_id = {$orderId}";
         $items = $this->orders->query($itemSql);
 
         $this->view('admin/orders/show.twig', [

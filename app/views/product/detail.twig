@@ -979,8 +979,8 @@
 
 
     {# existing image markup stays below #}
-    {% if product.primary_image %}
-        <img src="{{ product.primary_image }}" alt="{{ product.name }}">
+    {% if images|length > 0 %}
+        <img src="{{ images[0].image_path }}" alt="{{ product.name }}">
     {% else %}
         <div class="emoji-placeholder">📱</div>
     {% endif %}
