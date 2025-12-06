@@ -92,6 +92,15 @@
                             <div class="text-[11px] text-gray-500">
                                 {{ o.created_at|date('d M Y H:i') }}
                             </div>
+                            {% set summary = order_items_summary[o.id]|default(null) %}
+                            {% if summary %}
+                            <div class="text-[11px] text-gray-500">
+                                Items: {{ summary.distinct_count }} • Qty: {{ summary.total_qty }}
+                                {% if summary.preview_str %}
+                                    — {{ summary.preview_str }}{% if summary.distinct_count > 3 %} +{{ summary.distinct_count - 3 }} more{% endif %}
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </td>
                         <td class="p-3 align-top text-xs text-gray-700">
                             {{ o.user_id }}

@@ -33,9 +33,41 @@ class OrderController extends BaseController
         $orders = $this->orders->query($sql);
         $total = $this->orders->count();
 
+        // Build item summaries for displayed orders
+        $orderItemsSummary = [];
+        $ids = array_map(static function ($o) { return (int)$o['id']; }, $orders);
+        if (!empty($ids)) {
+            $in = implode(',', $ids);
+            $itemSql = "SELECT oi.order_id, oi.product_name, oi.quantity
+            FROM order_items oi
+            WHERE oi.order_id IN ({$in})";
+
+            $rows = $this->orders->query($itemSql);
+            foreach ($rows as $r) {
+                $oid = (int)$r['order_id'];
+                if (!isset($orderItemsSummary[$oid])) {
+                    $orderItemsSummary[$oid] = [
+                        'total_qty' => 0,
+                        'distinct_count' => 0,
+                        'preview' => []
+                    ];
+                }
+                $orderItemsSummary[$oid]['total_qty'] += (int)$r['quantity'];
+                $orderItemsSummary[$oid]['distinct_count'] += 1;
+                if (count($orderItemsSummary[$oid]['preview']) < 3) {
+                    $orderItemsSummary[$oid]['preview'][] = trim((string)$r['product_name']) . ' x' . (int)$r['quantity'];
+                }
+            }
+            // Convert preview arrays to strings
+            foreach ($orderItemsSummary as $oid => $sum) {
+                $orderItemsSummary[$oid]['preview_str'] = implode(', ', $sum['preview']);
+            }
+        }
+
         $this->view('admin/orders/index.twig', [
             'title' => 'Orders',
             'orders' => $orders,
+            'order_items_summary' => $orderItemsSummary,
             'pagination' => [
                 'total' => $total,
                 'current_page' => $page,
