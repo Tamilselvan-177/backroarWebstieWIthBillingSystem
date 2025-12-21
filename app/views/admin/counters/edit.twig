@@ -1,0 +1,260 @@
+{% extends "base.twig" %}
+{% block title %}Edit Counter{% endblock %}
+{% block content %}
+<section class="py-8 bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4">
+    <div class="max-w-2xl mx-auto">
+      
+      <!-- Header -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-2">
+          <a 
+            href="{{ app_url }}/admin/counters" 
+            class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-white transition"
+          >
+            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </a>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Edit Counter</h1>
+            <p class="text-sm text-gray-600">Update counter information and settings</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <form method="post" action="{{ app_url }}/admin/counters/{{ item.id }}/update" class="space-y-6">
+          <input type="hidden" name="_token" value="{{ csrf_token }}">
+          
+          <!-- Counter Information Section -->
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+              Counter Information
+            </h2>
+            
+            <div class="space-y-4">
+              <!-- Store Selection -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Store Location <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <select 
+                    name="store_id" 
+                    required
+                    class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition appearance-none bg-white"
+                  >
+                    {% for s in stores %}
+                      <option value="{{ s.id }}" {% if item.store_id == s.id %}selected{% endif %}>
+                        {{ s.code }} — {{ s.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Code & Name -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Counter Code <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="code" 
+                    required
+                    value="{{ item.code }}"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition font-mono text-base"
+                  >
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Counter Name <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="name" 
+                    required
+                    value="{{ item.name }}"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Section -->
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+              Counter Status
+            </h2>
+            
+            <div class="bg-gray-50 rounded-xl p-4">
+              <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative">
+                  <input 
+                    type="checkbox" 
+                    name="is_active" 
+                    value="1" 
+                    {% if item.is_active %}checked{% endif %}
+                    class="sr-only peer"
+                  >
+                  <div class="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-black transition-colors duration-200"></div>
+                  <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-5 shadow-sm"></div>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900 group-hover:text-black transition">Active Counter</p>
+                  <p class="text-xs text-gray-600">Counter can be used for POS transactions</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Security Section -->
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+              Change PIN (Optional)
+            </h2>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  New PIN
+                </label>
+                <div class="relative">
+                  <input 
+                    type="password" 
+                    name="pin_new" 
+                    id="pin_new"
+                    minlength="4"
+                    maxlength="6"
+                    placeholder="Enter new 4-6 digit PIN"
+                    class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition font-mono text-lg tracking-widest placeholder:text-sm placeholder:tracking-normal"
+                  >
+                  <button 
+                    type="button" 
+                    onclick="togglePin('pin_new', 'pinIcon1')"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition p-1"
+                    tabindex="-1"
+                  >
+                    <svg id="pinIcon1" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm New PIN
+                </label>
+                <div class="relative">
+                  <input 
+                    type="password" 
+                    name="pin_confirm" 
+                    id="pin_confirm"
+                    minlength="4"
+                    maxlength="6"
+                    placeholder="Confirm new PIN"
+                    class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition font-mono text-lg tracking-widest placeholder:text-sm placeholder:tracking-normal"
+                  >
+                  <button 
+                    type="button" 
+                    onclick="togglePin('pin_confirm', 'pinIcon2')"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition p-1"
+                    tabindex="-1"
+                  >
+                    <svg id="pinIcon2" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="bg-blue-50 rounded-xl p-4 flex items-start gap-3 border border-blue-100">
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-xs text-blue-800 leading-relaxed">
+                  Leave both fields blank to keep the existing PIN. Both fields must match to update the PIN successfully.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+            <button 
+              type="submit" 
+              class="flex-1 sm:flex-none px-8 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium shadow-sm hover:shadow inline-flex items-center justify-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Update Counter
+            </button>
+            <a 
+              href="{{ app_url }}/admin/counters" 
+              class="flex-1 sm:flex-none px-8 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-center inline-flex items-center justify-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="mt-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900 mb-1">Security Best Practices</p>
+            <ul class="text-xs text-gray-600 space-y-1">
+              <li>• Change PINs regularly to maintain security</li>
+              <li>• Deactivate counters when not in use for extended periods</li>
+              <li>• Keep counter codes short and memorable for staff</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function togglePin(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+    `;
+  } else {
+    input.type = 'password';
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+    `;
+  }
+}
+</script>
+{% endblock %}

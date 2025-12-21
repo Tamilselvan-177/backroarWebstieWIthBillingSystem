@@ -1,0 +1,229 @@
+{% extends "base.twig" %}
+{% block title %}Counters{% endblock %}
+{% block content %}
+<section class="py-8 bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">POS Counters</h1>
+        <p class="text-sm text-gray-600 mt-1">Manage point-of-sale counters across all stores</p>
+      </div>
+      <div class="flex gap-3">
+        <a 
+          href="{{ app_url }}/admin/counters/create" 
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium shadow-sm hover:shadow"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add Counter
+        </a>
+        <a 
+          href="{{ app_url }}/admin" 
+          class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-white transition font-medium"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+      <form method="get" action="{{ app_url }}/admin/counters" class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Store</label>
+          <div class="relative">
+            <select 
+              name="store_id" 
+              class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition appearance-none"
+            >
+              <option value="">All Stores</option>
+              {% for s in stores %}
+                <option value="{{ s.id }}" {% if store_id == s.id %}selected{% endif %}>
+                  {{ s.code }} — {{ s.name }}
+                </option>
+              {% endfor %}
+            </select>
+            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-end">
+          <button 
+            type="submit"
+            class="w-full md:w-auto px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium"
+          >
+            Apply Filter
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Counters List Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      {% if items is empty %}
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-4">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">No counters found</h3>
+          <p class="text-sm text-gray-600 mb-6 text-center max-w-md">
+            {% if store_id %}
+              No counters for the selected store. Try a different filter or add a new counter.
+            {% else %}
+              Get started by adding your first POS counter. Counters are used to process sales transactions.
+            {% endif %}
+          </p>
+          <a 
+            href="{{ app_url }}/admin/counters/create" 
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Counter
+          </a>
+        </div>
+      {% else %}
+        <!-- Counters Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Store Location
+                </th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Counter
+                </th>
+                <th class="text-center px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="text-right px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for c in items %}
+                <tr class="hover:bg-gray-50 transition">
+                  <!-- Store Location -->
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                        {{ c.store_code }}
+                      </div>
+                      <div>
+                        <p class="font-medium text-gray-900">{{ c.store_name }}</p>
+                        <p class="text-xs text-gray-500">Store {{ c.store_code }}</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Counter Info -->
+                  <td class="px-6 py-4">
+                    <div>
+                      <p class="font-medium text-gray-900">{{ c.name }}</p>
+                      <p class="text-sm text-gray-600 font-mono">Code: {{ c.code }}</p>
+                    </div>
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-6 py-4 text-center">
+                    {% if c.is_active %}
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                        <span class="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+                        Active
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                        <span class="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                        Inactive
+                      </span>
+                    {% endif %}
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <a 
+                        href="{{ app_url }}/admin/counters/{{ c.id }}/edit" 
+                        class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition font-medium"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                      </a>
+                      <form method="post" action="{{ app_url }}/admin/counters/{{ c.id }}/toggle" class="inline-block">
+                        <input type="hidden" name="_token" value="{{ csrf_token }}">
+                        <button 
+                          type="submit"
+                          class="inline-flex items-center gap-2 px-4 py-2 {% if c.is_active %}border border-red-300 text-red-700 hover:bg-red-50{% else %}border border-green-300 text-green-700 hover:bg-green-50{% endif %} text-sm rounded-lg transition font-medium"
+                        >
+                          {% if c.is_active %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
+                            Deactivate
+                          {% else %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Activate
+                          {% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="bg-gray-50 border-t border-gray-200 px-6 py-4">
+          <div class="flex items-center justify-between text-sm">
+            <p class="text-gray-600">
+              Total Counters: <span class="font-semibold text-gray-900">{{ items|length }}</span>
+            </p>
+            <p class="text-gray-600">
+              Active: <span class="font-semibold text-green-700">{{ items|filter(c => c.is_active)|length }}</span> • 
+              Inactive: <span class="font-semibold text-red-700">{{ items|filter(c => not c.is_active)|length }}</span>
+            </p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Help Section -->
+    {% if items is not empty %}
+      <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-blue-900">Counter Management Tips</p>
+            <p class="text-sm text-blue-800 mt-1">
+              Each counter requires a unique code and PIN for staff access. Deactivate unused counters to maintain security. Change PINs regularly for better protection.
+            </p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

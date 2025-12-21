@@ -1,0 +1,247 @@
+{% extends "base.twig" %}
+{% block title %}Add Staff{% endblock %}
+{% block content %}
+<section class="py-8 bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4">
+    <div class="max-w-2xl mx-auto">
+      
+      <!-- Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Add New Staff Member</h1>
+        <p class="text-sm text-gray-600 mt-1">Create a new staff account with access credentials</p>
+      </div>
+
+      <!-- Error Messages -->
+      {% if errors %}
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-red-800 mb-2">Please correct the following errors:</p>
+              <ul class="space-y-1">
+                {% for field, msg in errors %}
+                  <li class="text-sm text-red-700">• {{ msg }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Form Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <form method="post" action="{{ app_url }}/admin/staff/store" class="space-y-6">
+          <input type="hidden" name="_token" value="{{ csrf_token }}">
+          
+          <!-- Personal Information Section -->
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+              Personal Information
+            </h2>
+            
+            <div class="space-y-4">
+              <!-- Name -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  required
+                  placeholder="Enter staff member's full name"
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition"
+                >
+              </div>
+
+              <!-- Email & Phone -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    required
+                    placeholder="staff@example.com"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition"
+                  >
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    placeholder="+91 98765 43210"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Section -->
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+              Security Credentials
+            </h2>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Password <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  name="password" 
+                  id="password"
+                  required
+                  minlength="6"
+                  placeholder="Minimum 6 characters"
+                  class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition"
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePassword()"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+                >
+                  <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Password Strength Indicator -->
+              <div class="mt-2 space-y-1">
+                <div class="flex gap-1">
+                  <div id="strength1" class="h-1 flex-1 bg-gray-200 rounded transition-all"></div>
+                  <div id="strength2" class="h-1 flex-1 bg-gray-200 rounded transition-all"></div>
+                  <div id="strength3" class="h-1 flex-1 bg-gray-200 rounded transition-all"></div>
+                  <div id="strength4" class="h-1 flex-1 bg-gray-200 rounded transition-all"></div>
+                </div>
+                <p class="text-xs text-gray-500">
+                  Password strength: <span id="strengthText" class="font-medium">Not set</span>
+                </p>
+              </div>
+
+              <!-- Password Requirements -->
+              <div class="mt-3 bg-gray-50 rounded-lg p-3">
+                <p class="text-xs font-medium text-gray-700 mb-2">Password requirements:</p>
+                <ul class="space-y-1 text-xs text-gray-600">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Minimum 6 characters
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Mix of letters, numbers recommended
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3 pt-4 border-t border-gray-100">
+            <button 
+              type="submit" 
+              class="flex-1 md:flex-none px-8 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium shadow-sm hover:shadow"
+            >
+              Create Staff Account
+            </button>
+            <a 
+              href="{{ app_url }}/admin/staff" 
+              class="flex-1 md:flex-none px-8 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-center"
+            >
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Help Text -->
+      <div class="mt-4 text-center">
+        <p class="text-sm text-gray-500">
+          Staff members will receive their login credentials via email
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Toggle password visibility
+function togglePassword() {
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eyeIcon');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+    `;
+  } else {
+    input.type = 'password';
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+    `;
+  }
+}
+
+// Password strength indicator
+document.getElementById('password')?.addEventListener('input', function(e) {
+  const password = e.target.value;
+  const strength = calculatePasswordStrength(password);
+  
+  // Reset all bars
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`strength${i}`).className = 'h-1 flex-1 bg-gray-200 rounded transition-all';
+  }
+  
+  // Update based on strength
+  const colors = {
+    0: { count: 0, text: 'Not set', color: 'bg-gray-200' },
+    1: { count: 1, text: 'Weak', color: 'bg-red-500' },
+    2: { count: 2, text: 'Fair', color: 'bg-yellow-500' },
+    3: { count: 3, text: 'Good', color: 'bg-blue-500' },
+    4: { count: 4, text: 'Strong', color: 'bg-green-500' }
+  };
+  
+  const level = colors[strength];
+  for (let i = 1; i <= level.count; i++) {
+    document.getElementById(`strength${i}`).className = `h-1 flex-1 ${level.color} rounded transition-all`;
+  }
+  
+  document.getElementById('strengthText').textContent = level.text;
+});
+
+function calculatePasswordStrength(password) {
+  if (!password) return 0;
+  
+  let strength = 0;
+  
+  // Length check
+  if (password.length >= 6) strength++;
+  if (password.length >= 10) strength++;
+  
+  // Complexity checks
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+  if (/\d/.test(password)) strength++;
+  if (/[^a-zA-Z0-9]/.test(password)) strength++;
+  
+  return Math.min(strength, 4);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,787 @@
+{% extends "base.twig" %}
+{% block title %}POS Billing{% endblock %}
+{% block content %}
+<section class="admin-shell py-6">
+  <style>
+    nav, footer, #marvel-intro { display: none !important; }
+    #main-content { padding-top: 0 !important; }
+    body { overflow: auto; background: #fafafa; }
+    .desktop-toolbar { display:flex; gap:.5rem; align-items:center; }
+    
+    /* Black & White Theme */
+    .admin-card {
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      background: white;
+      border: 1px solid #e5e7eb;
+    }
+    .admin-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #d1d5db;
+    }
+    .admin-input {
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+      transition: all 0.2s ease;
+      background: white;
+    }
+    .admin-input:focus {
+      border-color: #000;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+      outline: none;
+    }
+    .btn-primary {
+      background: #000;
+      color: white;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .btn-primary:hover {
+      background: #1a1a1a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    }
+    .btn-secondary {
+      transition: all 0.2s ease;
+      border: 2px solid #e5e7eb;
+      background: white;
+    }
+    .btn-secondary:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+    .btn-danger {
+      background: #000;
+      color: white;
+      transition: all 0.2s ease;
+    }
+    .btn-danger:hover {
+      background: #1a1a1a;
+      transform: translateY(-1px);
+    }
+    .cart-table thead {
+      background: #f9fafb;
+      border-radius: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .cart-table tbody tr {
+      transition: background 0.15s ease;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .cart-table tbody tr:hover {
+      background: #fafafa;
+    }
+    .stat-card {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+    }
+    .total-card {
+      background: #000;
+      color: white;
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge-success { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+    .badge-warning { background: #fefce8; color: #854d0e; border-color: #fde047; }
+    .badge-info { background: #f9fafb; color: #000; border-color: #e5e7eb; }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6b7280;
+    }
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1rem;
+      opacity: 0.3;
+      stroke: #000;
+    }
+    
+    .recent-bill-card {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      background: white;
+      border: 1px solid #e5e7eb;
+    }
+    .recent-bill-card:hover {
+      background: #fafafa;
+      transform: translateX(2px);
+      border-color: #d1d5db;
+    }
+    
+    .payment-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .payment-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+    }
+    .payment-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .shortcut-hint {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      margin-left: 0.25rem;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-in {
+      animation: slideIn 0.3s ease;
+    }
+    
+    .highlight-value {
+      font-weight: 700;
+      color: #000;
+    }
+    
+    @media print {
+      nav, footer, #marvel-intro { display: none !important; }
+      .admin-shell { padding: 0 !important; }
+      .admin-card { box-shadow: none !important; border: none !important; }
+    }
+  </style>
+  <div class="container mx-auto px-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 admin-header slide-in">
+      <div>
+        <h2 class="text-2xl font-bold mb-1">Point of Sale</h2>
+        <div class="flex items-center gap-3 text-sm">
+          <span class="badge badge-info">{{ store_code }}</span>
+          <span class="badge badge-warning">FY {{ financial_year }}</span>
+          <span class="text-gray-500">•</span>
+          <span class="text-gray-500">⌨️ F1: Barcode | F3: Search | F4: Qty | F6: Discount</span>
+        </div>
+      </div>
+      <div class="desktop-toolbar">
+        <a href="{{ app_url }}/admin/pos/login" class="btn-secondary px-4 py-2 rounded-full text-sm font-medium">
+          🔄 Switch Store
+        </a>
+        <a href="{{ app_url }}/admin" class="btn-secondary px-4 py-2 rounded-full text-sm font-medium">
+          ⚙️ Admin Panel
+        </a>
+        <button id="openDesktop" class="btn-primary px-4 py-2 rounded-full text-sm font-medium">
+          🖥️ Desktop View
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Cart -->
+      <div class="lg:col-span-2">
+        <!-- Scan Input -->
+        <div class="admin-card p-5 mb-6 slide-in">
+          <form method="post" action="{{ app_url }}/admin/pos/add-item" class="flex gap-3">
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+            <div class="flex-1">
+              <input type="text" name="barcode" placeholder="🔍 Scan SKU or Barcode (F1)" 
+                     class="admin-input w-full text-base px-4 py-2.5" autofocus>
+            </div>
+            <div class="w-28">
+              <input type="number" name="quantity" value="1" min="1" 
+                     class="admin-input w-full text-base text-center px-3 py-2.5" placeholder="Qty">
+            </div>
+            <button type="submit" class="btn-primary px-6 py-2.5 rounded-full font-medium">
+              ➕ Add Item
+            </button>
+          </form>
+        </div>
+
+        <!-- Cart Items -->
+        <div class="admin-card p-6 slide-in">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b-2 border-gray-200">
+            <div class="flex items-center gap-3">
+              <h3 class="text-lg font-bold">🛒 Cart Items</h3>
+              {% if cart is not empty %}
+                <span class="badge badge-success">{{ cart|length }} items</span>
+              {% endif %}
+            </div>
+            <span class="text-sm text-gray-500">💰 Billing Summary</span>
+          </div>
+          
+          {% if cart is not empty %}
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm cart-table">
+                <thead>
+                  <tr class="text-gray-700 text-xs uppercase tracking-wide font-bold">
+                    <th class="text-left p-3">Product</th>
+                    <th class="text-center p-3">Quantity</th>
+                    <th class="text-center p-3">Unit Price</th>
+                    <th class="text-center p-3">GST %</th>
+                    <th class="text-center p-3">Discount %</th>
+                    <th class="text-center p-3">Line Total</th>
+                    <th class="text-right p-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% set subtotal = 0 %}
+                  {% set gst_total = 0 %}
+                  {% set discount_total = 0 %}
+                  {% for p in cart %}
+                    {% set line_sub = p.price * p.quantity %}
+                    {% set disc = line_sub * (p.discount_percent / 100) %}
+                    {% set base = line_sub - disc %}
+                    {% set gst = base * (p.gst_percent / 100) %}
+                    {% set line_total = base + gst %}
+                    {% set subtotal = subtotal + line_sub %}
+                    {% set discount_total = discount_total + disc %}
+                    {% set gst_total = gst_total + gst %}
+                    <tr>
+                      <td class="p-3">
+                        <div class="font-semibold text-gray-900">{{ p.name }}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">SKU: {{ p.sku ?? 'N/A' }}</div>
+                      </td>
+                      <td class="text-center p-3">
+                        <form method="post" action="{{ app_url }}/admin/pos/update-qty" class="flex items-center justify-center gap-2">
+                          <input type="hidden" name="_token" value="{{ csrf_token }}">
+                          <input type="hidden" name="product_id" value="{{ p.product_id }}">
+                          <input type="number" name="quantity" value="{{ p.quantity }}" min="1" 
+                                 class="admin-input w-20 text-center font-semibold px-2 py-1.5">
+                          <button class="btn-secondary px-3 py-1.5 rounded-full text-xs font-medium">✓</button>
+                        </form>
+                      </td>
+                      <td class="text-center p-3 font-semibold">₹{{ p.price|number_format(2, '.', ',') }}</td>
+                      <td class="text-center p-3">
+                        <span class="badge badge-info">{{ p.gst_percent }}%</span>
+                      </td>
+                      <td class="text-center p-3">
+                        <form method="post" action="{{ app_url }}/admin/pos/update-discount" class="flex items-center justify-center gap-2">
+                          <input type="hidden" name="_token" value="{{ csrf_token }}">
+                          <input type="hidden" name="product_id" value="{{ p.product_id }}">
+                          <input type="number" step="0.01" name="discount_percent" value="{{ p.discount_percent }}" 
+                                 min="0" max="100" class="admin-input w-20 text-center font-semibold discount-input px-2 py-1.5">
+                          <button class="btn-secondary px-3 py-1.5 rounded-full text-xs font-medium">✓</button>
+                        </form>
+                      </td>
+                      <td class="text-center p-3 highlight-value text-base">₹{{ line_total|number_format(2, '.', ',') }}</td>
+                      <td class="text-right p-3">
+                        <form method="post" action="{{ app_url }}/admin/pos/remove-item">
+                          <input type="hidden" name="_token" value="{{ csrf_token }}">
+                          <input type="hidden" name="product_id" value="{{ p.product_id }}">
+                          <button class="btn-danger px-3 py-1.5 rounded-full text-xs font-medium">🗑️ Remove</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p class="font-bold text-gray-900 mb-1 text-base">Cart is Empty</p>
+              <p class="text-sm text-gray-500">Scan a barcode or search for products to start billing</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    
+
+        <!-- Payment Form -->
+        <div class="admin-card p-5 mb-6 slide-in">
+          <h3 class="font-bold text-base mb-4 flex items-center gap-2 pb-2 border-b border-gray-200">
+            💳 Payment Information
+          </h3>
+<form method="post" action="{{ app_url }}/admin/pos/checkout" class="space-y-4">
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+            
+            <div>
+              <label class="text-xs font-bold text-gray-700 mb-1.5 block uppercase tracking-wide">Sale Type</label>
+              <select name="sale_type" class="admin-input w-full px-4 py-2.5">
+                <option value="Shop" {% if temp.sale_type != 'Online' %}selected{% endif %}>🏪 In-Shop Purchase</option>
+                <option value="Online" {% if temp.sale_type == 'Online' %}selected{% endif %}>🌐 Online Order</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700 mb-1.5 block uppercase tracking-wide">Billed By</label>
+              <select name="staff_id" class="admin-input w-full px-4 py-2.5">
+                <option value="">Select Staff Member</option>
+                {% for s in staff %}
+                  <option value="{{ s.id }}" {% if temp.staff_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700 mb-1.5 block uppercase tracking-wide">Customer Name</label>
+              <input type="text" name="customer_name" value="{{ temp.customer_name ?? '' }}" placeholder="Enter customer name" class="admin-input w-full px-4 py-2.5">
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700 mb-1.5 block uppercase tracking-wide">Phone Number</label>
+              <input type="tel" name="customer_phone" value="{{ temp.customer_phone ?? '' }}" placeholder="Enter phone number" class="admin-input w-full px-4 py-2.5">
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700 mb-1.5 block uppercase tracking-wide">Service Charge (Optional)</label>
+              <div class="flex items-center gap-2">
+                <input type="number" step="0.01" name="service_charge" value="{{ service_charge > 0 ? service_charge : '' }}" placeholder="₹ 0.00" class="admin-input flex-1 px-4 py-2.5">
+                <button type="submit" formaction="{{ app_url }}/admin/pos/update-service-charge" class="btn-secondary px-4 py-2.5 rounded-full text-xs font-medium">
+                  Update
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700 mb-2 block uppercase tracking-wide">Payment Methods</label>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="text-xs text-gray-600 mb-1 block font-medium">💵 Cash <span class="shortcut-hint">(F7)</span></label>
+                  <input type="number" step="0.01" name="cash_amount" value="{{ temp.cash_amount ?? '' }}" placeholder="₹ 0" class="admin-input w-full text-center px-3 py-2.5 font-semibold">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600 mb-1 block font-medium">💳 Card <span class="shortcut-hint">(F8)</span></label>
+                  <input type="number" step="0.01" name="card_amount" value="{{ temp.card_amount ?? '' }}" placeholder="₹ 0" class="admin-input w-full text-center px-3 py-2.5 font-semibold">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600 mb-1 block font-medium">📱 UPI <span class="shortcut-hint">(F9)</span></label>
+                  <input type="number" step="0.01" name="upi_amount" value="{{ temp.upi_amount ?? '' }}" placeholder="₹ 0" class="admin-input w-full text-center px-3 py-2.5 font-semibold">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="payment-btn btn-primary px-6 py-3.5 rounded-full font-bold text-base w-full shadow-lg">
+              🎯 Complete Checkout
+            </button>
+          </form>
+        </div>
+
+        <!-- Totals Summary -->
+        <div class="admin-card p-5 mb-6 slide-in">
+          <div class="grid grid-cols-4 gap-3 mb-4">
+            <div class="stat-card text-center">
+              <p class="text-xs text-gray-600 mb-1 font-semibold uppercase">Subtotal</p>
+              <p class="font-bold text-base">₹{{ subtotal|number_format(2, '.', ',') }}</p>
+            </div>
+            <div class="stat-card text-center">
+              <p class="text-xs text-gray-600 mb-1 font-semibold uppercase">Discounts</p>
+              <p class="font-bold text-base">-₹{{ discount_total|number_format(2, '.', ',') }}</p>
+            </div>
+            <div class="stat-card text-center">
+              <p class="text-xs text-gray-600 mb-1 font-semibold uppercase">GST</p>
+              <p class="font-bold text-base">+₹{{ gst_total|number_format(2, '.', ',') }}</p>
+            </div>
+            <div class="stat-card text-center bg-green-50 border-green-200">
+              <p class="text-xs text-green-700 mb-1 font-semibold uppercase">Change Due</p>
+              <p class="font-bold text-base text-green-700" id="changeDue">₹0.00</p>
+            </div>
+          </div>
+          
+          <div class="total-card">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold uppercase tracking-wide">Grand Total</span>
+              <span class="text-2xl font-bold">₹{{ (subtotal - discount_total + gst_total + service_charge)|number_format(2, '.', ',') }}
+</span>
+            </div>
+          </div>
+          
+          <div class="mt-4 grid grid-cols-1 gap-3">
+            <div class="stat-card">
+              <p class="text-xs text-gray-600 mb-2 font-semibold uppercase">Cash Drawer</p>
+              <div class="mb-3">
+                <div class="grid grid-cols-5 gap-2 text-xs" id="changeBreakdown">
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="2000"><span>₹2000</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="500"><span>₹500</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="200"><span>₹200</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="100"><span>₹100</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="50"><span>₹50</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="20"><span>₹20</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="10"><span>₹10</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="5"><span>₹5</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="2"><span>₹2</span><span class="font-semibold">0</span></div>
+                  <div class="flex items-center justify-between px-2 py-1 border border-gray-200 rounded" data-denom="1"><span>₹1</span><span class="font-semibold">0</span></div>
+                </div>
+                <div class="text-xs text-gray-600 mt-1">Remainder <span class="font-semibold" id="changeRemainder">₹0.00</span></div>
+              </div>
+              <button type="button" id="openDrawerBtn" class="btn-secondary px-4 py-2.5 rounded-full text-xs font-medium w-full">🔓 Open Cash Drawer (F10)</button>
+            </div>
+          </div>
+          
+          <form method="post" action="{{ app_url }}/admin/pos/clear" class="mt-4">
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+            <button class="btn-secondary px-4 py-2.5 rounded-full text-sm font-medium w-full">
+              🆕 New Bill <span class="shortcut-hint">(F2)</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Recent Bills -->
+        <div class="admin-card p-5 slide-in">
+          <h3 class="font-bold text-base mb-4 flex items-center gap-2 pb-2 border-b border-gray-200">
+            📋 Recent Transactions
+          </h3>
+          {% if recent_orders is empty %}
+            <div class="text-center py-6">
+              <p class="text-sm text-gray-500">No recent bills</p>
+            </div>
+          {% else %}
+            <div class="max-h-80 overflow-auto space-y-2">
+              {% for r in recent_orders %}
+                <div class="recent-bill-card p-3 rounded-lg">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-sm">{{ r.order_number }}</span>
+                    <span class="font-bold text-base">₹{{ r.grand_total|number_format(2, '.', ',') }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+                    <span>🕒 {{ r.created_at }}</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <a href="{{ app_url }}/admin/pos/orders/{{ r.id }}/show" 
+                       class="btn-secondary px-3 py-1.5 rounded-full text-xs font-medium flex-1 text-center">
+                      👁️ View
+                    </a>
+                    <a href="{{ app_url }}/admin/pos/orders/{{ r.id }}/show?print=1" 
+                       class="btn-secondary px-3 py-1.5 rounded-full text-xs font-medium flex-1 text-center">
+                      🖨️ Print
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div id="searchModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50">
+    <div class="max-w-3xl mx-auto mt-20 bg-white rounded-2xl shadow-2xl p-6 slide-in border-2 border-gray-200">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b-2 border-gray-200">
+        <h3 class="text-xl font-bold">🔍 Search Products</h3>
+        <button id="closeSearch" class="btn-secondary px-4 py-2 rounded-full text-sm font-medium">
+          ✕ Close (Esc)
+        </button>
+      </div>
+      <input type="text" id="searchInputPos" placeholder="Type product name, SKU, or barcode..." 
+             class="admin-input w-full text-base mb-4 px-4 py-3" autofocus>
+      <div id="searchResults" class="max-h-96 overflow-auto"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    const key = e.key;
+    const active = document.activeElement;
+    const isQty = active && active.matches('form[action$="/admin/pos/update-qty"] input[name="quantity"]');
+    const isDisc = active && active.matches('form[action$="/admin/pos/update-discount"] .discount-input');
+    if (isQty || isDisc) {
+      const qtyInputs = Array.from(document.querySelectorAll('form[action$="/admin/pos/update-qty"] input[name="quantity"]'));
+      const discInputs = Array.from(document.querySelectorAll('form[action$="/admin/pos/update-discount"] .discount-input'));
+      const currentList = isQty ? qtyInputs : discInputs;
+      const idx = currentList.indexOf(active);
+      if (key === 'ArrowDown' && idx < currentList.length - 1) {
+        e.preventDefault();
+        currentList[idx + 1].focus();
+        currentList[idx + 1].select?.();
+        return;
+      }
+      if (key === 'ArrowUp' && idx > 0) {
+        e.preventDefault();
+        currentList[idx - 1].focus();
+        currentList[idx - 1].select?.();
+        return;
+      }
+      if (key === 'ArrowRight' || key === 'ArrowLeft') {
+        e.preventDefault();
+        const row = active.closest('tr');
+        if (row) {
+          const target = isQty
+            ? row.querySelector('form[action$="/admin/pos/update-discount"] .discount-input')
+            : row.querySelector('form[action$="/admin/pos/update-qty"] input[name="quantity"]');
+          if (target) {
+            target.focus();
+            target.select?.();
+          }
+        }
+        return;
+      }
+      if (key === 'Enter') {
+        e.preventDefault();
+        const form = active.closest('form');
+        if (form) form.submit();
+        return;
+      }
+    }
+    if (key === 'F1') {
+      e.preventDefault();
+      const el = document.querySelector('input[name="barcode"]');
+      if (el) el.focus();
+    }
+    if (key === 'F2') {
+      e.preventDefault();
+      const form = document.querySelector('form[action$="/admin/pos/clear"]');
+      if (form) form.submit();
+    }
+    if (key === 'F4') {
+      e.preventDefault();
+      const el = document.querySelector('input[name="quantity"]');
+      if (el) el.focus();
+    }
+    if (key === 'F6') {
+      e.preventDefault();
+      const el = document.querySelector('.discount-input');
+      if (el) el.focus();
+    }
+    if (key === 'F3') {
+      e.preventDefault();
+      openSearch();
+    }
+    if (key === 'F7') {
+      e.preventDefault();
+      const el = document.querySelector('input[name="cash_amount"]');
+      if (el) { el.focus(); el.select?.(); }
+    }
+    if (key === 'F8') {
+      e.preventDefault();
+      const el = document.querySelector('input[name="card_amount"]');
+      if (el) { el.focus(); el.select?.(); }
+    }
+    if (key === 'F9') {
+      e.preventDefault();
+      const el = document.querySelector('input[name="upi_amount"]');
+      if (el) { el.focus(); el.select?.(); }
+    }
+    if (key === 'F10') {
+      e.preventDefault();
+      if (window.openDrawer) { window.openDrawer(); }
+    }
+    if (key === 'Escape') {
+      const modal = document.getElementById('searchModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeSearch();
+      }
+    }
+  });
+  
+  (function() {
+    const btn = document.getElementById('openDesktop');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        const url = '{{ app_url }}/admin/pos/billing?mode=desktop';
+        const w = window.screen.availWidth || 1280;
+        const h = window.screen.availHeight || 900;
+        const win = window.open(url, 'pos_desktop', 'toolbar=no,menubar=no,location=no,status=no,scrollbars=yes,resizable=yes,width='+w+',height='+h);
+        if (win && win.focus) { win.focus(); }
+      });
+    }
+    if ({{ desktop_mode ? 'true' : 'false' }}) {
+      const goFull = async () => {
+        try { await document.documentElement.requestFullscreen(); } catch (_) {}
+      };
+      setTimeout(goFull, 100);
+    }
+    
+    function openSearch() {
+      const modal = document.getElementById('searchModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('searchInputPos');
+        if (input) { input.focus(); input.select(); }
+      }
+    }
+    
+    function closeSearch() {
+      const modal = document.getElementById('searchModal');
+      if (modal) modal.classList.add('hidden');
+    }
+    window.openSearch = openSearch;
+    
+    const closeBtn = document.getElementById('closeSearch');
+    if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+    
+    const searchInput = document.getElementById('searchInputPos');
+    const resultsEl = document.getElementById('searchResults');
+    if (searchInput && resultsEl) {
+      let timer = null;
+      let selIdx = -1;
+      let currentItems = [];
+      
+      function renderResults(items) {
+        const html = items.map((it, i) => `
+          <div class="flex items-center justify-between p-4 border-b border-gray-200 result-item hover:bg-gray-50 transition${i===selIdx?' bg-gray-100':''}" data-index="${i}">
+            <div class="flex-1">
+              <div class="font-bold text-base mb-1">${it.name}</div>
+              <div class="flex items-center gap-3 text-xs text-gray-600">
+                <span class="font-medium">💰 ₹${Number(it.price).toFixed(2)}</span>
+                <span class="font-medium">📊 GST ${Number(it.gst_percent).toFixed(2)}%</span>
+                <span class="font-medium">📦 Stock: ${it.available ?? 0}</span>
+              </div>
+            </div>
+            <form method="post" action="{{ app_url }}/admin/pos/add-item" class="flex items-center gap-3">
+              <input type="hidden" name="_token" value="{{ csrf_token }}">
+              <input type="hidden" name="product_id" value="${it.id}">
+              <input type="number" name="quantity" value="1" min="1" class="admin-input w-20 text-center px-3 py-2 font-semibold">
+              <button class="btn-primary px-4 py-2 rounded-full text-sm font-medium">➕ Add</button>
+            </form>
+          </div>
+        `).join('');
+        resultsEl.innerHTML = html || '<div class="text-center py-12 text-gray-500"><p class="text-base font-semibold">No products found</p><p class="text-sm mt-2">Try a different search term</p></div>';
+      }
+      
+      searchInput.addEventListener('input', function() {
+        const q = searchInput.value.trim();
+        if (timer) { clearTimeout(timer); }
+        timer = setTimeout(() => {
+          if (q.length < 2) { 
+            resultsEl.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm">Type at least 2 characters to search...</div>'; 
+            return;
+          }
+          fetch('{{ app_url }}/admin/pos/search-products?q=' + encodeURIComponent(q))
+            .then(r => r.json())
+            .then(items => {
+              selIdx = items.length > 0 ? 0 : -1;
+              currentItems = items;
+              renderResults(currentItems);
+              const nodes = Array.from(resultsEl.querySelectorAll('.result-item'));
+              nodes.forEach((node, i) => {
+                node.addEventListener('mouseenter', () => { 
+                  selIdx = i; 
+                  renderResults(currentItems); 
+                });
+              });
+            })
+            .catch(() => { 
+              resultsEl.innerHTML = '<div class="text-center py-12 text-red-600 text-sm font-semibold">Error loading results</div>'; 
+            });
+        }, 250);
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('searchModal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        const nodes = Array.from(resultsEl.querySelectorAll('.result-item'));
+        if (nodes.length === 0) return;
+        
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selIdx = Math.min(selIdx + 1, nodes.length - 1);
+          renderResults(currentItems);
+          nodes[selIdx]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selIdx = Math.max(selIdx - 1, 0);
+          renderResults(currentItems);
+          nodes[selIdx]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else if (e.key === 'Enter') {
+          const current = resultsEl.querySelector('.result-item[data-index="'+selIdx+'"] form');
+          if (current) { 
+            e.preventDefault(); 
+            current.submit(); 
+          }
+        }
+      });
+    }
+  })();
+
+  // Change Calculator
+(function () {
+  const grandTotal = Number(
+    "{{ (subtotal - discount_total + gst_total + service_charge)|number_format(2, '.', '') }}"
+  );
+
+  const cashInput = document.querySelector('input[name="cash_amount"]');
+  const cardInput = document.querySelector('input[name="card_amount"]');
+  const upiInput  = document.querySelector('input[name="upi_amount"]');
+  const changeEl  = document.getElementById('changeDue');
+
+  function calculateChange() {
+    const cash = parseFloat(cashInput?.value) || 0;
+    const card = parseFloat(cardInput?.value) || 0;
+    const upi  = parseFloat(upiInput?.value) || 0;
+
+    const paid = cash + card + upi;
+    const balance = paid - grandTotal;
+
+    // Only show POSITIVE balance (money to return)
+    changeEl.textContent = balance > 0
+      ? '₹' + balance.toFixed(2)
+      : '₹0.00';
+  }
+
+  [cashInput, cardInput, upiInput].forEach(i => {
+    if (i) i.addEventListener('input', calculateChange);
+  });
+
+  calculateChange();
+})();
+</script>
+<script>
+(function(){
+  const changeEl = document.getElementById('changeDue');
+  const breakdownEl = document.getElementById('changeBreakdown');
+  const remainderEl = document.getElementById('changeRemainder');
+  const openBtn = document.getElementById('openDrawerBtn');
+  const denoms = [2000,500,200,100,50,20,10,5,2,1];
+  function updateBreakdown(val) {
+    if (!breakdownEl) return;
+    const change = parseFloat(String(val).replace(/[^0-9.]/g,'')) || 0;
+    let rem = Math.floor(change);
+    denoms.forEach(d => {
+      const node = breakdownEl.querySelector('[data-denom="'+d+'"] span.font-semibold');
+      if (node) {
+        const cnt = Math.floor(rem/d);
+        node.textContent = String(cnt);
+        rem = rem - cnt*d;
+      }
+    });
+    if (remainderEl) {
+      const paise = change - Math.floor(change);
+      remainderEl.textContent = '₹' + paise.toFixed(2);
+    }
+  }
+  if (changeEl) {
+    const obs = new MutationObserver(() => { updateBreakdown(changeEl.textContent); });
+    obs.observe(changeEl, { characterData: true, subtree: true, childList: true });
+    updateBreakdown(changeEl.textContent);
+  }
+  function openDrawer() {
+    try {
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.value = 880;
+      osc.connect(ctx.destination);
+      osc.start();
+      setTimeout(() => { osc.stop(); ctx.close(); }, 180);
+    } catch(_){}
+    if (openBtn) {
+      openBtn.classList.add('ring-2','ring-green-400');
+      setTimeout(() => openBtn.classList.remove('ring-2','ring-green-400'), 600);
+    }
+  }
+  window.openDrawer = openDrawer;
+  if (openBtn) openBtn.addEventListener('click', openDrawer);
+})();
+</script>
+{% endblock %}

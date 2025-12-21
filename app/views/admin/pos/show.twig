@@ -1,0 +1,524 @@
+{% extends "base.twig" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="min-h-screen bg-gray-50 py-8">
+  <style>
+    nav, footer, #marvel-intro { display: none !important; }
+    #main-content { padding-top: 0 !important; }
+    
+    @media print {
+      @page { 
+        size: A4 portrait; 
+        margin: 15mm; 
+      }
+      
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      body { 
+        background: white;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      
+      section {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      
+      nav, footer, #marvel-intro { display: none !important; }
+      .no-print { display: none !important; }
+      
+      /* Hide last column (Actions) */
+      .print-table th:last-child, 
+      .print-table td:last-child { 
+        display: none !important; 
+      }
+      
+      /* Full width container */
+      .container { 
+        max-width: 100% !important; 
+        width: 100% !important;
+        padding: 0 10mm !important;
+        margin: 0 auto !important;
+      }
+      
+      /* Normal header */
+      h1 { 
+        font-size: 18px !important; 
+        margin-bottom: 8px !important;
+        font-weight: 700 !important;
+      }
+      
+      .meta { 
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+      }
+      
+      /* Normal table */
+      .print-table { 
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+      }
+      
+      .print-table th, 
+      .print-table td { 
+        padding: 8px 12px !important; 
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+      }
+      
+      .print-table thead th {
+        font-size: 11px !important;
+        padding: 10px 12px !important;
+      }
+      
+      /* Normal badges and pills */
+      .print-table .inline-block {
+        padding: 3px 8px !important;
+        font-size: 11px !important;
+      }
+      
+      /* Remove all shadows and borders */
+      .shadow-lg, .shadow-sm { 
+        box-shadow: none !important; 
+      }
+      
+      .border, .border-2 { 
+        border: 0.5px solid #ddd !important; 
+      }
+      
+      .border-b-2 {
+        border-bottom: 1px solid #ddd !important;
+      }
+      
+      /* Remove rounded corners */
+      .rounded-2xl, .rounded-xl, .rounded-lg, .rounded-md { 
+        border-radius: 0 !important; 
+      }
+      
+      /* White backgrounds */
+      .bg-gray-50 { 
+        background: white !important; 
+      }
+      
+      /* Convert grid to block */
+      .grid { 
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+      }
+      
+      .lg\:col-span-2, 
+      .lg\:col-span-1 { 
+        width: 100% !important;
+        max-width: 800px !important;
+      }
+      
+      /* Normal spacing */
+      .space-y-6 > * + * {
+        margin-top: 12px !important;
+      }
+      
+      .space-y-3 > * + * {
+        margin-top: 8px !important;
+      }
+      
+      /* Normal cards */
+      .totals-card { 
+        margin-top: 12px !important;
+        page-break-inside: avoid !important;
+      }
+      
+      .bg-white {
+        padding: 0 !important;
+        margin-bottom: 12px !important;
+      }
+      
+      .px-6 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      
+      .py-4 {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+      }
+      
+      .p-6 {
+        padding: 16px !important;
+      }
+      
+      /* Normal text sizes */
+      .text-sm { 
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+      }
+      
+      .text-xs { 
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+      }
+      
+      .text-base {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+      }
+      
+      .text-xl {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+      }
+      
+      .text-3xl {
+        font-size: 18px !important;
+      }
+      
+      /* Normal header metadata */
+      .flex.items-center.gap-4 {
+        gap: 12px !important;
+      }
+      
+      .flex.flex-col.gap-1 {
+        gap: 4px !important;
+      }
+      
+      /* Store info normal */
+      .pl-5 {
+        padding-left: 20px !important;
+      }
+      
+      /* Normal margins */
+      .mb-8 {
+        margin-bottom: 16px !important;
+      }
+      
+      .mb-2 {
+        margin-bottom: 8px !important;
+      }
+      
+      .mt-3, .pt-3 {
+        margin-top: 12px !important;
+        padding-top: 12px !important;
+      }
+      
+      .mt-2 {
+        margin-top: 8px !important;
+      }
+      
+      .mt-1 {
+        margin-top: 4px !important;
+      }
+      
+      /* Normal SVG icons */
+      svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      
+      /* Payment method boxes */
+      .p-3.rounded-lg {
+        padding: 12px !important;
+        border-radius: 0 !important;
+      }
+      
+      /* Center content */
+      .container {
+        page-break-inside: avoid !important;
+      }
+      
+      section {
+        padding: 0 !important;
+      }
+      
+      /* Normal spacing in payment methods */
+      .space-y-3 > * + * {
+        margin-top: 8px !important;
+      }
+      
+      /* Normal customer details */
+      .space-y-2 > * + * {
+        margin-top: 6px !important;
+      }
+    }
+  </style>
+  
+  <div class="container mx-auto px-4 max-w-7xl">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">🧾 Order #{{ order.order_number }}</h1>
+        <div class="flex items-center gap-4 text-sm text-gray-600">
+          <span class="px-2 py-1 rounded-md text-xs font-bold {% if order.sale_type == 'Online' %}bg-blue-100 text-blue-700 border border-blue-200{% else %}bg-gray-100 text-gray-700 border border-gray-200{% endif %}">
+            {{ order.sale_type|default('Shop') }}
+          </span>
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {{ order.created_at }}
+          </span>
+          {% if order.store_name %}
+          <div class="flex flex-col gap-1">
+            <span class="flex items-center gap-1 font-medium text-gray-900">
+              <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              {{ order.store_name }}
+            </span>
+            {% if order.store_address %}
+            <span class="pl-5 text-xs text-gray-500">{{ order.store_address }}</span>
+            {% endif %}
+            {% if order.store_city %}
+            <span class="pl-5 text-xs text-gray-500">{{ order.store_city }}{% if order.store_state %}, {{ order.store_state }}{% endif %}{% if order.store_pincode %} - {{ order.store_pincode }}{% endif %}</span>
+            {% endif %}
+            {% if order.store_gstin %}
+            <span class="pl-5 text-xs text-gray-700 font-semibold">GSTIN: {{ order.store_gstin }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="no-print flex gap-3">
+        <a href="{{ app_url }}/admin/pos/orders" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          ← Back to Orders
+        </a>
+        <button onclick="window.print()" 
+                class="inline-flex items-center px-4 py-2.5 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition-all shadow-sm">
+          🖨️ Print Bill
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Items Table -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+            <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              📦 Order Items
+              <span class="ml-auto text-xs font-semibold px-3 py-1 rounded-full bg-black text-white">
+                {{ items|length }} items
+              </span>
+            </h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm print-table">
+              <thead>
+                <tr class="bg-gray-50 border-b-2 border-gray-200">
+                  <th class="text-left px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Product</th>
+                  <th class="text-center px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Qty</th>
+                  <th class="text-right px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Price</th>
+                  <th class="text-center px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Disc%</th>
+                  <th class="text-center px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider">GST%</th>
+                  <th class="text-right px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider">Total</th>
+                  <th class="text-right px-4 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider no-print">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {% for it in items %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-4 py-3 font-semibold text-gray-900">{{ it.product_name }}</td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-block px-2 py-1 rounded-md bg-gray-100 font-semibold">{{ it.quantity }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-semibold">₹{{ it.price|number_format(2, '.', ',') }}</td>
+                  <td class="px-4 py-3 text-center">
+                    {% if it.discount_percent > 0 %}
+                      <span class="inline-block px-2 py-1 rounded-md bg-yellow-50 text-yellow-700 font-semibold text-xs border border-yellow-200">
+                        {{ it.discount_percent }}%
+                      </span>
+                    {% else %}
+                      <span class="text-gray-400">—</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="inline-block px-2 py-1 rounded-md bg-gray-100 font-semibold text-xs">
+                      {{ it.gst_percent }}%
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right font-bold text-gray-900">₹{{ it.line_total|number_format(2, '.', ',') }}</td>
+                  <td class="px-4 py-3 text-right no-print">
+                    {% set returned = (returns_by_item[it.id].qty|default(0)) %}
+                    {% set remaining = it.quantity - returned %}
+                    {% if remaining > 0 %}
+                      <a href="{{ app_url }}/admin/returns?pos_order_id={{ order.id }}&pos_order_item_id={{ it.id }}&store_id={{ order.store_id }}&product_id={{ it.product_id }}&quantity={{ remaining }}&refund_method=Cash&refund_amount={{ (it.line_total / it.quantity * remaining)|number_format(2, '.', '') }}&gst_adjustment={{ (it.gst_amount / it.quantity * remaining)|number_format(2, '.', '') }}" 
+                         class="inline-flex items-center px-3 py-1.5 rounded-lg border-2 border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                        ↩️ Return
+                      </a>
+                      <span class="ml-2 text-xs text-gray-500">Remaining: {{ remaining }}</span>
+                    {% else %}
+                      <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 border-2 border-gray-200 text-xs font-bold text-gray-500 cursor-not-allowed">
+                        Returned
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totals & Payment -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Totals Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden totals-card">
+          <div class="px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+            <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              💰 Order Summary
+            </h3>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 font-medium">Subtotal</span>
+              <span class="font-semibold text-gray-900">₹{{ order.subtotal|number_format(2, '.', ',') }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 font-medium">Discounts</span>
+              <span class="font-semibold text-red-600">-₹{{ order.discount_total|number_format(2, '.', ',') }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 font-medium">Service Charge</span>
+              <span class="font-semibold text-gray-900">₹{{ order.service_charge|number_format(2, '.', ',') }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 font-medium">GST</span>
+              <span class="font-semibold text-green-600">+₹{{ order.gst_total|number_format(2, '.', ',') }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 font-medium">Returns (Refund)</span>
+              <span class="font-semibold text-red-600">-₹{{ (net.refund_total|default(0))|number_format(2, '.', ',') }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 font-medium">GST Adjust (Returns)</span>
+              <span class="font-semibold text-red-600">-₹{{ (net.gst_return|default(0))|number_format(2, '.', ',') }}</span>
+            </div>
+            <div class="border-t-2 border-gray-200 pt-3 mt-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-gray-700 uppercase tracking-wide">Grand Total</span>
+                <span class="text-xl font-bold text-gray-900">₹{{ order.grand_total|number_format(2, '.', ',') }}</span>
+              </div>
+            </div>
+            <div class="border-t-2 border-gray-200 pt-3 mt-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-gray-700 uppercase tracking-wide">Net Total (after returns)</span>
+                <span class="text-xl font-bold text-gray-900">₹{{ (net.grand_total|default(order.grand_total))|number_format(2, '.', ',') }}</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 text-sm">
+                <span class="text-gray-600 font-medium">Net Subtotal</span>
+                <span class="font-semibold text-gray-900">₹{{ (net.subtotal|default(order.subtotal))|number_format(2, '.', ',') }}</span>
+              </div>
+              <div class="flex items-center justify-between mt-1 text-sm">
+                <span class="text-gray-600 font-medium">Net GST</span>
+                <span class="font-semibold text-gray-900">₹{{ (net.gst_total|default(order.gst_total))|number_format(2, '.', ',') }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Methods Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+            <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              💳 Payment Methods
+            </h3>
+          </div>
+          <div class="p-6 space-y-3">
+            {% if order.cash_amount > 0 %}
+            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                💵 Cash
+              </span>
+              <span class="font-bold text-gray-900">₹{{ order.cash_amount|number_format(2, '.', ',') }}</span>
+            </div>
+            {% endif %}
+            
+            {% if order.card_amount > 0 %}
+            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                💳 Card
+              </span>
+              <span class="font-bold text-gray-900">₹{{ order.card_amount|number_format(2, '.', ',') }}</span>
+            </div>
+            {% endif %}
+            
+            {% if order.upi_amount > 0 %}
+            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                📱 UPI
+              </span>
+              <span class="font-bold text-gray-900">₹{{ order.upi_amount|number_format(2, '.', ',') }}</span>
+            </div>
+            {% endif %}
+            {% if order.change_amount > 0 %}
+            <div class="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-200">
+              <span class="text-sm font-bold text-green-700">
+                🔁 Balance Returned
+              </span>
+              <span class="font-bold text-green-800">
+                ₹{{ order.change_amount|number_format(2, '.', ',') }}
+              </span>
+            </div>
+            {% endif %}
+
+            {% if order.cash_amount == 0 and order.card_amount == 0 and order.upi_amount == 0 %}
+            <div class="text-center py-4 text-sm text-gray-500">
+              No payment recorded
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Customer Info Card (if available) -->
+        {% if order.customer_name or order.customer_phone %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+            <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              👤 Customer Details
+            </h3>
+          </div>
+          <div class="p-6 space-y-2">
+            {% if order.customer_name %}
+            <div class="flex items-start gap-2 text-sm">
+              <span class="text-gray-600 font-medium min-w-[60px]">Name:</span>
+              <span class="font-semibold text-gray-900">{{ order.customer_name }}</span>
+            </div>
+            {% endif %}
+            {% if order.customer_phone %}
+            <div class="flex items-start gap-2 text-sm">
+              <span class="text-gray-600 font-medium min-w-[60px]">Phone:</span>
+              <span class="font-semibold text-gray-900">{{ order.customer_phone }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('print') === '1') {
+      setTimeout(() => { 
+        try { 
+          window.print(); 
+        } catch (e) {
+          console.error('Print failed:', e);
+        }
+      }, 150);
+    }
+  })();
+</script>
+{% endblock %}

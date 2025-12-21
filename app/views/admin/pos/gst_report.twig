@@ -1,0 +1,213 @@
+{% extends "base.twig" %}
+{% block title %}GST Report{% endblock %}
+{% block content %}
+<section class="min-h-screen bg-gray-50 py-8">
+  <div class="container mx-auto px-4 max-w-7xl">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-1">📊 GST Report</h1>
+        <p class="text-sm text-gray-600">View and export GST summary reports</p>
+      </div>
+      <div class="flex gap-2">
+        <a href="{{ app_url }}/admin/pos/orders" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          📋 POS Orders
+        </a>
+        <a href="{{ app_url }}/admin/pos/gst-report?store_id={{ filters.store_id }}&range={{ filters.range }}&from={{ filters.from }}&to={{ filters.to }}&export=csv" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition-all shadow-sm">
+          📥 Export CSV
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <h2 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+        🔍 Filter Options
+      </h2>
+      <form method="get" action="{{ app_url }}/admin/pos/gst-report">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <!-- Store Filter -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Store</label>
+            <select name="store_id" 
+                    class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+              <option value="">All Stores</option>
+              {% for s in stores %}
+                <option value="{{ s.id }}" {% if filters.store_id == s.id %}selected{% endif %}>
+                  {{ s.code }} — {{ s.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Range Filter -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Range</label>
+            <select name="range" 
+                    class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+              <option value="daily" {% if filters.range == 'daily' %}selected{% endif %}>Daily</option>
+              <option value="monthly" {% if filters.range == 'monthly' %}selected{% endif %}>Monthly</option>
+            </select>
+          </div>
+
+          <!-- From Date -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">From Date</label>
+            <input type="date" 
+                   name="from" 
+                   value="{{ filters.from }}"
+                   class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+          </div>
+
+          <!-- To Date -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">To Date</label>
+            <input type="date" 
+                   name="to" 
+                   value="{{ filters.to }}"
+                   class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-end">
+            <button type="submit" 
+                    class="w-full px-6 py-2.5 rounded-lg bg-black text-white text-sm font-bold hover:bg-gray-800 transition-all shadow-sm">
+              🔎 Apply Filters
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Report Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 border-b-2 border-gray-200">
+              <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                {{ filters.range == 'monthly' ? '📅 Month' : '📅 Day' }}
+              </th>
+              <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                💰 Subtotal
+              </th>
+              <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                🎫 Discounts
+              </th>
+              <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                📊 GST
+              </th>
+              <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                💵 Grand Total
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {% if rows is not empty %}
+              {% set total_subtotal = 0 %}
+              {% set total_discounts = 0 %}
+              {% set total_gst = 0 %}
+              {% set total_grand = 0 %}
+              
+              {% for r in rows %}
+                {% set total_subtotal = total_subtotal + r.subtotal %}
+                {% set total_discounts = total_discounts + r.discounts %}
+                {% set total_gst = total_gst + r.gst %}
+                {% set total_grand = total_grand + r.grand_total %}
+                
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                    {{ r.period }}
+                  </td>
+                  <td class="px-6 py-4 text-sm font-semibold text-right text-gray-900">
+                    ₹{{ r.subtotal|number_format(2, '.', ',') }}
+                  </td>
+                  <td class="px-6 py-4 text-sm font-semibold text-right text-gray-900">
+                    ₹{{ r.discounts|number_format(2, '.', ',') }}
+                  </td>
+                  <td class="px-6 py-4 text-sm font-semibold text-right text-gray-900">
+                    ₹{{ r.gst|number_format(2, '.', ',') }}
+                  </td>
+                  <td class="px-6 py-4 text-sm font-bold text-right text-gray-900">
+                    ₹{{ r.grand_total|number_format(2, '.', ',') }}
+                  </td>
+                </tr>
+              {% endfor %}
+              
+              <!-- Total Row -->
+              <tr class="bg-black text-white font-bold">
+                <td class="px-6 py-4 text-sm uppercase tracking-wide">
+                  📈 Total
+                </td>
+                <td class="px-6 py-4 text-sm text-right">
+                  ₹{{ total_subtotal|number_format(2, '.', ',') }}
+                </td>
+                <td class="px-6 py-4 text-sm text-right">
+                  ₹{{ total_discounts|number_format(2, '.', ',') }}
+                </td>
+                <td class="px-6 py-4 text-sm text-right">
+                  ₹{{ total_gst|number_format(2, '.', ',') }}
+                </td>
+                <td class="px-6 py-4 text-base text-right">
+                  ₹{{ total_grand|number_format(2, '.', ',') }}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center justify-center text-gray-500">
+                    <svg class="w-16 h-16 mb-4 opacity-30" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="text-base font-semibold text-gray-900 mb-1">No Data Available</p>
+                    <p class="text-sm text-gray-600">Try adjusting your filters to see results</p>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    {% if rows is not empty %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Subtotal</span>
+            <span class="text-2xl">💰</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">₹{{ total_subtotal|number_format(2, '.', ',') }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Discounts</span>
+            <span class="text-2xl">🎫</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">₹{{ total_discounts|number_format(2, '.', ',') }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">GST Collected</span>
+            <span class="text-2xl">📊</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">₹{{ total_gst|number_format(2, '.', ',') }}</p>
+        </div>
+
+        <div class="bg-black rounded-xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-white uppercase tracking-wide">Grand Total</span>
+            <span class="text-2xl">💵</span>
+          </div>
+          <p class="text-2xl font-bold text-white">₹{{ total_grand|number_format(2, '.', ',') }}</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

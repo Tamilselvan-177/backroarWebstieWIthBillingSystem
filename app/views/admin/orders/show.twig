@@ -287,6 +287,7 @@
                     </h1>
                 </div>
                 <div>
+                    <a href="{{ app_url }}/admin/orders/{{ order.id }}/billing" class="print-btn no-print" style="background: #8b5cf6; margin-right: 10px; text-decoration: none; display: inline-block;">🧾 Process Billing</a>
                     <button class="print-btn no-print" onclick="window.print()">🖨️ Print Label</button>
                 </div>
             </div>
@@ -376,6 +377,7 @@
                         <thead>
                             <tr>
                                 <th>Product</th>
+                                <th>Shop Name</th>
                                 <th>Quantity</th>
                                 <th>Price</th>
                                 <th>Subtotal</th>
@@ -401,6 +403,7 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td style="color: #4b5563; font-size: 0.9rem;">{{ item.store_name ?? '-' }}</td>
                                 <td style="text-align: center;">{{ item.quantity }}</td>
                                 <td>₹{{ item.price|number_format(2) }}</td>
                                 <td><strong>₹{{ item.subtotal|number_format(2) }}</strong></td>

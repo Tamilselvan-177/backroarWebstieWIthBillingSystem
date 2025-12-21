@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Store;
+use App\Models\StoreStock;
+
 class Order extends BaseModel
 {
     protected $table = 'orders';
@@ -178,15 +181,13 @@ class Order extends BaseModel
      */
     private function updateProductStock($productId, $quantity)
     {
-        $sql = "UPDATE products 
-                SET stock_quantity = stock_quantity - :quantity 
-                WHERE id = :product_id";
-        
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            'quantity' => $quantity,
-            'product_id' => $productId
-        ]);
+        $storeId = $this->defaultStoreId();
+        if ($storeId) {
+            $ss = new StoreStock();
+            return $ss->adjustStock($storeId, (int)$productId, -((int)$quantity));
+        }
+        $stmt = $this->db->prepare("UPDATE products SET stock_quantity = stock_quantity - :q WHERE id = :pid");
+        return $stmt->execute(['q' => $quantity, 'pid' => $productId]);
     }
 
     /**
@@ -339,15 +340,30 @@ class Order extends BaseModel
      */
     private function restoreProductStock($productId, $quantity)
     {
-        $sql = "UPDATE products 
-                SET stock_quantity = stock_quantity + :quantity 
-                WHERE id = :product_id";
-        
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            'quantity' => $quantity,
-            'product_id' => $productId
-        ]);
+        $storeId = $this->defaultStoreId();
+        if ($storeId) {
+            $ss = new StoreStock();
+            return $ss->adjustStock($storeId, (int)$productId, (int)$quantity);
+        }
+        $stmt = $this->db->prepare("UPDATE products SET stock_quantity = stock_quantity + :q WHERE id = :pid");
+        return $stmt->execute(['q' => $quantity, 'pid' => $productId]);
+    }
+
+    private function defaultStoreId(): ?int
+    {
+        try {
+            $storeModel = new Store();
+            $wm1 = $storeModel->findByCode('WM1');
+            if ($wm1 && (int)$wm1['is_active'] === 1) {
+                return (int)$wm1['id'];
+            }
+            $active = $storeModel->getActive();
+            if ($active && isset($active[0]['id'])) {
+                return (int)$active[0]['id'];
+            }
+        } catch (\Throwable $e) {
+        }
+        return null;
     }
     
 }

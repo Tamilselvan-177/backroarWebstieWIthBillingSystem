@@ -161,6 +161,11 @@
                             <span class="cat-name font-semibold uppercase block tracking-[0.18em]">
                                 {{ category.name }}
                             </span>
+                            {% if category.slug == 'mobile-skin' %}
+                                <span class="cat-count mt-1 block">
+                                    Fits all phones
+                                </span>
+                            {% endif %}
                             {% if category.product_count %}
                                 <span class="cat-count mt-1 block">
                                     ({{ category.product_count }} items)

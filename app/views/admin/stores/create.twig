@@ -1,0 +1,72 @@
+{% extends 'base.twig' %}
+
+{% block title %}{{ title }} — Admin{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">{{ title }}</h1>
+        <a href="{{ app_url }}/admin/stores" class="text-gray-600 hover:underline">
+            &larr; Back to Stores
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <form action="{{ app_url }}/admin/stores/store" method="POST">
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Store Code *</label>
+                    <input type="text" name="code" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black" placeholder="e.g. WM1">
+                    <p class="text-xs text-gray-500 mt-1">Unique identifier for the store.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Store Name *</label>
+                    <input type="text" name="name" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black" placeholder="e.g. Main Branch">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <textarea name="address" rows="2" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input type="text" name="city" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <input type="text" name="state" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
+                    <input type="text" name="pincode" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">GSTIN</label>
+                    <input type="text" name="gstin" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_active" value="1" checked class="form-checkbox h-5 w-5 text-black rounded border-gray-300 focus:ring-0">
+                    <span class="ml-2 text-gray-700">Active Store</span>
+                </label>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="bg-black text-white px-6 py-2 rounded font-semibold hover:bg-gray-800 transition">
+                    Create Store
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

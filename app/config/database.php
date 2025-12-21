@@ -4,7 +4,7 @@ return [
     'driver' => getenv('DB_DRIVER') ?: 'mysql',
     'host' => getenv('DB_HOST') ?: 'localhost',
     'port' => getenv('DB_PORT') ?: '3306',
-    'database' => getenv('DB_DATABASE') ?: 'ecommerce_db',
+    'database' => getenv('DB_DATABASE') ?: 'if0_40604963_backroar',
     'username' => getenv('DB_USERNAME') ?: 'root',
     'password' => getenv('DB_PASSWORD') ?: 'AkTAMIL7708#',
     'charset' => 'utf8mb4',

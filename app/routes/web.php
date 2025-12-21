@@ -20,6 +20,15 @@ use App\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Controllers\WishlistController;
 use App\Controllers\Admin\SubcategoryController;
 use App\Controllers\Admin\AdminCouponController;
+use App\Controllers\Admin\PosController as AdminPosController;
+use App\Controllers\Admin\StockController as AdminStockController;
+use App\Controllers\Admin\ReturnsController as AdminReturnsController;
+use App\Controllers\Admin\ProductStockController as AdminProductStockController;
+use App\Controllers\Admin\CounterController as AdminCounterController;
+use App\Controllers\Admin\StaffController as AdminStaffController;
+use App\Controllers\Admin\StockTransferController as AdminStockTransferController;
+use App\Controllers\Admin\StoreController as AdminStoreController;
+
 // ============================================================
 // HOME & MAIN ROUTES
 // ============================================================
@@ -101,6 +110,57 @@ $router->guardPrefix('/admin', AdminMiddleware::class);
 // ADMIN DASHBOARD
 $router->get('/admin', AdminDashboardController::class, 'index');
 
+// ADMIN POS
+$router->get('/admin/pos/login', AdminPosController::class, 'loginForm');
+$router->get('/admin/pos/counters', AdminPosController::class, 'countersAjax');
+$router->post('/admin/pos/start', AdminPosController::class, 'start');
+$router->get('/admin/pos/billing', AdminPosController::class, 'billing');
+$router->post('/admin/pos/hold', AdminPosController::class, 'hold');
+$router->get('/admin/pos/recall', AdminPosController::class, 'recall');
+$router->post('/admin/pos/add-item', AdminPosController::class, 'addItem');
+$router->post('/admin/pos/update-qty', AdminPosController::class, 'updateQty');
+$router->post('/admin/pos/update-discount', AdminPosController::class, 'updateDiscount');
+$router->post('/admin/pos/update-service-charge', AdminPosController::class, 'updateServiceCharge');
+$router->post('/admin/pos/remove-item', AdminPosController::class, 'removeItem');
+$router->post('/admin/pos/checkout', AdminPosController::class, 'checkout');
+$router->post('/admin/pos/clear', AdminPosController::class, 'clear');
+$router->get('/admin/pos/search-products', AdminPosController::class, 'searchProducts');
+$router->get('/admin/pos/orders', AdminPosController::class, 'orders');
+$router->get('/admin/pos/orders/{id}/show', AdminPosController::class, 'orderShow');
+$router->get('/admin/pos/gst-report', AdminPosController::class, 'gstReport');
+$router->get('/admin/pos/backfill-stock', AdminPosController::class, 'backfillStock');
+$router->get('/admin/pos/populate-products', AdminPosController::class, 'populateProductFields');
+
+// ADMIN COUNTERS
+$router->get('/admin/counters', AdminCounterController::class, 'index');
+$router->get('/admin/counters/create', AdminCounterController::class, 'create');
+$router->post('/admin/counters/store', AdminCounterController::class, 'store');
+$router->get('/admin/counters/{id}/edit', AdminCounterController::class, 'edit');
+$router->post('/admin/counters/{id}/update', AdminCounterController::class, 'update');
+$router->post('/admin/counters/{id}/toggle', AdminCounterController::class, 'toggleActive');
+
+// ADMIN STAFF
+$router->get('/admin/staff', AdminStaffController::class, 'index');
+$router->get('/admin/staff/create', AdminStaffController::class, 'create');
+$router->post('/admin/staff/store', AdminStaffController::class, 'store');
+$router->get('/admin/staff/{id}/edit', AdminStaffController::class, 'edit');
+$router->post('/admin/staff/{id}/update', AdminStaffController::class, 'update');
+
+// ADMIN STOCK TRANSFER
+$router->get('/admin/stock/transfer', AdminStockTransferController::class, 'index');
+$router->post('/admin/stock/transfer/add-to-cart', AdminStockTransferController::class, 'addToCart');
+$router->post('/admin/stock/transfer/remove-from-cart', AdminStockTransferController::class, 'removeFromCart');
+$router->post('/admin/stock/transfer/clear-cart', AdminStockTransferController::class, 'clearCart');
+$router->post('/admin/stock/transfer/bulk-transfer', AdminStockTransferController::class, 'bulkTransfer');
+$router->post('/admin/stock/transfer/move', AdminStockTransferController::class, 'move');
+$router->get('/admin/stock/transfer/history', AdminStockTransferController::class, 'history');
+$router->get('/admin/stock/transfer/view', AdminStockTransferController::class, 'viewTransfer');
+
+// ADMIN RETURNS
+$router->get('/admin/returns', AdminReturnsController::class, 'create');
+$router->post('/admin/returns', AdminReturnsController::class, 'store');
+$router->get('/admin/returns/search', AdminReturnsController::class,'searchBill');
+
 // ADMIN PRODUCTS - COMPLETE
 $router->get('/admin/products', AdminProductController::class, 'index');
 $router->get('/admin/products/create', AdminProductController::class, 'create');
@@ -110,6 +170,10 @@ $router->post('/admin/products/{id}', AdminProductController::class, 'update');
 $router->post('/admin/products/{id}/delete', AdminProductController::class, 'delete');
 $router->post('/admin/products/{id}/toggleActive', AdminProductController::class, 'toggleActive');
 $router->post('/admin/products/{id}/toggleFeatured', AdminProductController::class, 'toggleFeatured');
+
+// ADMIN PRODUCT STORE STOCK
+$router->get('/admin/products/{id}/stock', AdminProductStockController::class, 'edit');
+$router->post('/admin/products/{id}/stock', AdminProductStockController::class, 'update');
 
 // **FIXED AJAX ROUTES - MATCH YOUR JAVASCRIPT**
 $router->get('/admin/products/ajaxSubcategories/{categoryId}', AdminProductController::class, 'ajaxSubcategories');
@@ -126,6 +190,7 @@ $router->post('/admin/products/{id}/images/reorder', AdminImageController::class
 $router->get('/admin/orders', AdminOrderController::class, 'index');
 $router->post('/admin/orders/{id}/status', AdminOrderController::class, 'updateStatus');
 $router->get('/admin/orders/{id}/show', AdminOrderController::class, 'show');
+$router->get('/admin/orders/{id}/billing', AdminOrderController::class, 'billing');
 
 // ADMIN CATEGORIES
 $router->get('/admin/categories', AdminCategoryController::class, 'index');
@@ -159,6 +224,7 @@ $router->post('/admin/reviews/bulk-action', AdminReviewController::class, 'bulkA
 
 // Test Route
 $router->get('/test', HomeController::class, 'test');
+
 // ADMIN SUBCATEGORIES
 $router->get('/admin/subcategories', SubcategoryController::class, 'index');
 $router->get('/admin/subcategories/create', SubcategoryController::class, 'create');
@@ -171,7 +237,6 @@ $router->post('/admin/subcategories/{id}/toggleActive', SubcategoryController::c
 $router->post('/checkout/apply-coupon', CheckoutController::class, 'applyCoupon');
 
 // coupon management routes
-
 $router->get('/admin/coupons', AdminCouponController::class, 'index');
 $router->get('/admin/coupons/create', AdminCouponController::class, 'create');
 $router->post('/admin/coupons/store', AdminCouponController::class, 'store');
@@ -179,3 +244,15 @@ $router->get('/admin/coupons/{id}/edit', AdminCouponController::class, 'edit');
 $router->post('/admin/coupons/{id}/update', AdminCouponController::class, 'update');
 $router->post('/admin/coupons/{id}/delete', AdminCouponController::class, 'delete');
 $router->post('/admin/coupons/{id}/toggle', AdminCouponController::class, 'toggleStatus');
+
+// ADMIN STORES
+$router->get('/admin/stores', AdminStoreController::class, 'index');
+$router->get('/admin/stores/create', AdminStoreController::class, 'create');
+$router->post('/admin/stores/store', AdminStoreController::class, 'store');
+$router->get('/admin/stores/{id}/edit', AdminStoreController::class, 'edit');
+$router->post('/admin/stores/{id}/update', AdminStoreController::class, 'update');
+$router->post('/admin/stores/{id}/delete', AdminStoreController::class, 'delete');
+$router->post('/admin/stores/{id}/toggle', AdminStoreController::class, 'toggleActive');
+
+// analysis
+$router->get('/admin/analytics', AdminDashboardController::class, 'analytics');

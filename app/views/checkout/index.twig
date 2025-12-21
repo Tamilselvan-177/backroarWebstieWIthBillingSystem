@@ -418,6 +418,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (saveBtn) {
         saveBtn.addEventListener('click', function() {
+            // Clear previous errors
+            document.querySelectorAll('#addAddressFormElement .text-red-600').forEach(el => el.remove());
+
             const payload = new URLSearchParams();
             payload.append('full_name', document.getElementById('addr_full_name').value || '');
             payload.append('phone', document.getElementById('addr_phone').value || '');
@@ -434,13 +437,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
             fetch(appUrl + '/checkout/address', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: payload.toString()
-            }).then(function() {
-                window.location.reload();
-            }).catch(function(err) {
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save Address';
+                    
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const input = document.querySelector(`#addAddressFormElement [name="${field}"]`);
+                            if (input) {
+                                const errorP = document.createElement('p');
+                                errorP.className = 'text-red-600 text-sm mt-1';
+                                errorP.textContent = data.errors[field];
+                                input.parentNode.appendChild(errorP);
+                            }
+                        });
+                    } else if (data.message) {
+                        alert(data.message);
+                    }
+                }
+            })
+            .catch(function(err) {
                 console.error('Address save failed', err);
-                window.location.reload();
+                alert('An error occurred while saving the address.');
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Address';
             });
         });
     }

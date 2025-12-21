@@ -4,6 +4,7 @@ namespace Core;
 
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
+use Twig\TwigFunction;
 
 class View
 {
@@ -30,6 +31,7 @@ class View
             }
             self::$twig->addGlobal('session', $_SESSION);
             self::$twig->addGlobal('csrf_token', csrf_token());
+            self::$twig->addFunction(new TwigFunction('flash', 'flash'));
         }
     }
 

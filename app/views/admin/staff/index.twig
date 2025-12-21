@@ -1,0 +1,174 @@
+{% extends "base.twig" %}
+{% block title %}Staff Management{% endblock %}
+{% block content %}
+<section class="py-8 bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Staff Management</h1>
+        <p class="text-sm text-gray-600 mt-1">Manage your team members and their access</p>
+      </div>
+      <div class="flex gap-3">
+        <a 
+          href="{{ app_url }}/admin/staff/create" 
+          class="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium shadow-sm hover:shadow"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add Staff
+        </a>
+        <a 
+          href="{{ app_url }}/admin" 
+          class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-white transition font-medium"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Staff List Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      {% if items is empty %}
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-4">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-1">No staff members yet</h3>
+          <p class="text-sm text-gray-600 mb-6 text-center max-w-md">
+            Get started by adding your first staff member. They'll be able to help manage your store.
+          </p>
+          <a 
+            href="{{ app_url }}/admin/staff/create" 
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl hover:bg-gray-800 transition font-medium"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add First Staff Member
+          </a>
+        </div>
+      {% else %}
+        <!-- Staff Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Staff Member
+                </th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Contact
+                </th>
+                <th class="text-center px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="text-right px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for u in items %}
+                <tr class="hover:bg-gray-50 transition">
+                  <!-- Staff Member Info -->
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {{ u.name|slice(0, 2)|upper }}
+                      </div>
+                      <div>
+                        <p class="font-medium text-gray-900">{{ u.name }}</p>
+                        <p class="text-sm text-gray-500">{{ u.email }}</p>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Contact -->
+                  <td class="px-6 py-4">
+                    {% if u.phone %}
+                      <div class="flex items-center gap-2 text-sm text-gray-700">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                        {{ u.phone }}
+                      </div>
+                    {% else %}
+                      <span class="text-sm text-gray-400">No phone</span>
+                    {% endif %}
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-6 py-4 text-center">
+                    {% if u.is_active %}
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                        <span class="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+                        Active
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                        <span class="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                        Inactive
+                      </span>
+                    {% endif %}
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-6 py-4 text-right">
+                    <a 
+                      href="{{ app_url }}/admin/staff/{{ u.id }}/edit" 
+                      class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition font-medium"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="bg-gray-50 border-t border-gray-200 px-6 py-4">
+          <div class="flex items-center justify-between text-sm">
+            <p class="text-gray-600">
+              Total Staff: <span class="font-semibold text-gray-900">{{ items|length }}</span>
+            </p>
+            <p class="text-gray-600">
+              Active: <span class="font-semibold text-green-700">{{ items|filter(u => u.is_active)|length }}</span>
+            </p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Help Text -->
+    {% if items is not empty %}
+      <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-blue-900">Staff Management Tips</p>
+            <p class="text-sm text-blue-800 mt-1">
+              Remember to deactivate staff accounts when members leave to maintain security. Active staff can login and access the admin panel.
+            </p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -428,6 +428,15 @@
                               class="ml-1 bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5 hidden"></span>
                         {% endif %}
                     </a>
+                    {% if session.role == 'admin' or session.role == 'staff' %}
+                    <a href="{{ app_url }}/admin" aria-label="Admin" class="hidden md:inline-flex items-center gap-2 nav-cta px-3 py-2">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                            <path d="M19.4 15a7.5 7.5 0 0 0 .1-2l2-1-2-3-2 1a7.5 7.5 0 0 0-1.7-1l.3-2.2h-4l.3 2.2a7.5 7.5 0 0 0-1.7 1l-2-1-2 3 2 1a7.5 7.5 0 0 0 .1 2l-2 1 2 3 2-1a7.5 7.5 0 0 0 1.7 1l-.3 2.2h4l-.3-2.2a7.5 7.5 0 0 0 1.7-1l2 1 2-3-2-1z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Admin</span>
+                    </a>
+                    {% endif %}
 
                     <!-- User dropdown -->
                     <div class="relative userDropdown">
@@ -506,6 +515,9 @@
                     <a href="{{ app_url }}/categories" class="block text-[var(--brand-text)]">Categories</a>
                     <a href="{{ app_url }}/about" class="block text-[var(--brand-text)]">About</a>
                     <a href="{{ app_url }}/contact" class="block text-[var(--brand-text)]">Contact</a>
+                    {% if session.role == 'admin' or session.role == 'staff' %}
+                        <a href="{{ app_url }}/admin" class="block text-[var(--brand-text)]">Admin</a>
+                    {% endif %}
                     {% if not session.user_id %}
                         <a href="{{ app_url }}/login" class="block text-[var(--brand-text)]">Login</a>
                     {% endif %}
@@ -513,79 +525,82 @@
             </div>
         </nav>
 
+        <div class="container mx-auto px-4 mt-4">
+            {% set success = flash('success') %}
+            {% if success %}
+                <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-lg" role="alert">
+                    {{ success }}
+                </div>
+            {% endif %}
+            
+            {% set error = flash('error') %}
+            {% if error %}
+                <div class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </div>
+
         {% block content %}{% endblock %}
-
+        
+      {% block footer %}
+      {% if not (session.role == 'admin' or session.role == 'staff') %}
       <footer class="bg-black text-white py-12">
-    <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-
-            <!-- Useful Links -->
-            <div>
-                <h4 class="text-lg font-semibold mb-4">USEFUL LINKS</h4>
-                <div class="w-12 h-1 bg-green-500 mb-4"></div>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="#" class="hover:text-white">Love from the Customers</a></li>
-
-                    <!-- About & Contact DO NOT EXIST in routes — if you add routes, this becomes correct -->
-                    <li><a href="{{ app_url }}/about" class="hover:text-white">About Us</a></li>
-                    <li><a href="{{ app_url }}/contact" class="hover:text-white">Contact Us</a></li>
-
-                    <!-- These routes DO NOT EXIST unless you add them manually -->
-                    <li><a href="{{ app_url }}/refund-policy" class="hover:text-white">Refund Policy</a></li>
-                    <li><a href="{{ app_url }}/privacy-policy" class="hover:text-white">Privacy Policy</a></li>
-                    <li><a href="{{ app_url }}/shipping-policy" class="hover:text-white">Shipping Policy</a></li>
-                    <li><a href="{{ app_url }}/terms" class="hover:text-white">Terms and Conditions</a></li>
-                </ul>
-            </div>
-
-            <!-- Account -->
-            <div>
-                <h4 class="text-lg font-semibold mb-4">ACCOUNT</h4>
-                <div class="w-12 h-1 bg-green-500 mb-4"></div>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="{{ app_url }}/orders" class="hover:text-white">My Orders</a></li>
-                    <li><a href="{{ app_url }}/account" class="hover:text-white">My Account</a></li>
-                    <li><a href="{{ app_url }}/orders" class="hover:text-white">Track Order</a></li>
-                    <li><a href="{{ app_url }}/checkout" class="hover:text-white">Checkout</a></li>
-                </ul>
-            </div>
-
-            <!-- Help Center -->
-            <div>
-                <h4 class="text-lg font-semibold mb-4">HELP CENTER</h4>
-                <div class="w-12 h-1 bg-green-500 mb-4"></div>
-
-                <p class="text-gray-400 mb-2">
-                    Support time : 09.30 AM to 06.00 PM (Monday to Saturday)
-                </p>
-                <p class="text-gray-400 mb-4">Contact@backroar.in</p>
-
-                <h5 class="font-semibold mb-2">Connect with us</h5>
-                <div class="flex space-x-4 text-gray-400">
-                    <a href="#" class="hover:text-white">FB</a>
-                    <a href="#" class="hover:text-white">IG</a>
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">USEFUL LINKS</h4>
+                    <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Love from the Customers</a></li>
+                        <li><a href="{{ app_url }}/about" class="hover:text-white">About Us</a></li>
+                        <li><a href="{{ app_url }}/contact" class="hover:text-white">Contact Us</a></li>
+                        <li><a href="{{ app_url }}/refund-policy" class="hover:text-white">Refund Policy</a></li>
+                        <li><a href="{{ app_url }}/privacy-policy" class="hover:text-white">Privacy Policy</a></li>
+                        <li><a href="{{ app_url }}/shipping-policy" class="hover:text-white">Shipping Policy</a></li>
+                        <li><a href="{{ app_url }}/terms" class="hover:text-white">Terms and Conditions</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">ACCOUNT</h4>
+                    <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{{ app_url }}/orders" class="hover:text-white">My Orders</a></li>
+                        <li><a href="{{ app_url }}/account" class="hover:text-white">My Account</a></li>
+                        <li><a href="{{ app_url }}/orders" class="hover:text-white">Track Order</a></li>
+                        <li><a href="{{ app_url }}/checkout" class="hover:text-white">Checkout</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">HELP CENTER</h4>
+                    <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                    <p class="text-gray-400 mb-2">Support time : 09.30 AM to 06.00 PM (Monday to Saturday)</p>
+                    <p class="text-gray-400 mb-4">Contact@backroar.in</p>
+                    <h5 class="font-semibold mb-2">Connect with us</h5>
+                    <div class="flex space-x-4 text-gray-400">
+                        <a href="#" class="hover:text-white">FB</a>
+                        <a href="#" class="hover:text-white">IG</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">REGISTERED OFFICE ADDRESS:</h4>
+                    <div class="w-12 h-1 bg-green-500 mb-4"></div>
+                    <p class="text-gray-400">Backroar</p>
+                    <p class="text-gray-400">503 Rhythm Plaza</p>
+                    <p class="text-gray-400">Nikol Ringroad</p>
+                    <p class="text-gray-400">Ahmedabad Gujarat - 382350</p>
                 </div>
             </div>
-
-            <!-- Office Address -->
-            <div>
-                <h4 class="text-lg font-semibold mb-4">REGISTERED OFFICE ADDRESS:</h4>
-                <div class="w-12 h-1 bg-green-500 mb-4"></div>
-                <p class="text-gray-400">Backroar</p>
-                <p class="text-gray-400">503 Rhythm Plaza</p>
-                <p class="text-gray-400">Nikol Ringroad</p>
-                <p class="text-gray-400">Ahmedabad Gujarat - 382350</p>
+            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
+                <p>Copyright 2025 © Backroar.in</p>
+                <div class="flex gap-2 mt-4 md:mt-0">
+                    <img src="{{ app_url }}/public/images/final_payments_icon.png" alt="Payment Methods" class="h-6">
+                </div>
             </div>
         </div>
-
-        <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
-            <p>Copyright 2025 © Backroar.in</p>
-            <div class="flex gap-2 mt-4 md:mt-0">
-                <img src="{{ app_url }}/public/images/final_payments_icon.png" alt="Payment Methods" class="h-6">
-            </div>
-        </div>
-    </div>
-</footer>
+      </footer>
+      {% endif %}
+      {% endblock %}
 
     </div>
     <!-- ========== END MAIN CONTENT WRAPPER ========== -->

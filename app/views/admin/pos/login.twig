@@ -1,0 +1,173 @@
+{% extends "base.twig" %}
+{% block title %}POS Login{% endblock %}
+{% block content %}
+<section class="min-h-screen bg-gray-50 py-12">
+  <div class="container mx-auto px-4">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-block p-4 bg-black rounded-2xl mb-4">
+        <svg class="w-12 h-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">🔐 POS Session Login</h1>
+      <p class="text-sm text-gray-600">Enter your credentials to start a new POS session</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 max-w-2xl mx-auto">
+      <form method="post" action="{{ app_url }}/admin/pos/start" class="space-y-6">
+        <input type="hidden" name="_token" value="{{ csrf_token }}">
+        
+        <!-- Store Selection -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            🏪 Select Shop
+          </label>
+          <select name="store_id" 
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+            <option value="">Choose a shop...</option>
+            {% for s in stores %}
+              <option value="{{ s.id }}">{{ s.code }} — {{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Counter Selection -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            💻 Counter
+          </label>
+          <select name="counter_id" 
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+            <option value="">Select shop first...</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Counters will load after selecting a shop
+          </p>
+        </div>
+
+        <!-- Counter PIN -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            🔑 Counter PIN
+          </label>
+          <input type="password" 
+                 name="counter_pin" 
+                 placeholder="Enter your counter PIN"
+                 class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+          <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Enter the secure PIN for the selected counter
+          </p>
+        </div>
+
+        <!-- Financial Year -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+            📅 Financial Year
+          </label>
+          <select name="financial_year" 
+                  class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+            <option value="">Select financial year...</option>
+            {% for y in years %}
+              <option value="{{ y }}">{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200 pt-6">
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button type="submit" 
+                    class="flex-1 px-6 py-3.5 rounded-lg bg-black text-white text-sm font-bold hover:bg-gray-800 transition-all shadow-sm">
+              ✓ Start Session
+            </button>
+            <a href="{{ app_url }}/admin" 
+               class="flex-1 px-6 py-3.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all text-center">
+              ✕ Cancel
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mt-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <div class="text-2xl mb-2">🔒</div>
+        <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Secure Access</p>
+        <p class="text-xs text-gray-500">PIN protected sessions</p>
+      </div>
+      
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <div class="text-2xl mb-2">📊</div>
+        <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Multi-Counter</p>
+        <p class="text-xs text-gray-500">Support for multiple counters</p>
+      </div>
+      
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <div class="text-2xl mb-2">⚡</div>
+        <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Fast Billing</p>
+        <p class="text-xs text-gray-500">Quick and efficient checkout</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function() {
+    const storeSel = document.querySelector('select[name="store_id"]');
+    const counterSel = document.querySelector('select[name="counter_id"]');
+    
+    async function loadCounters(storeId) {
+      if (!counterSel) return;
+      
+      // Show loading state
+      counterSel.innerHTML = '<option value="">⏳ Loading counters...</option>';
+      counterSel.disabled = true;
+      
+      try {
+        const res = await fetch('{{ app_url }}/admin/pos/counters?store_id=' + encodeURIComponent(storeId));
+        const items = await res.json();
+        
+        if (items && items.length > 0) {
+          const opts = ['<option value="">Select a counter...</option>'].concat(
+            items.map(it => `<option value="${it.id}">${it.code} — ${it.name}</option>`)
+          );
+          counterSel.innerHTML = opts.join('');
+        } else {
+          counterSel.innerHTML = '<option value="">No counters available</option>';
+        }
+      } catch (error) {
+        console.error('Failed to load counters:', error);
+        counterSel.innerHTML = '<option value="">❌ Failed to load counters</option>';
+      } finally {
+        counterSel.disabled = false;
+      }
+    }
+    
+    if (storeSel && counterSel) {
+      storeSel.addEventListener('change', function() {
+        const sid = this.value;
+        if (sid) {
+          loadCounters(sid);
+        } else {
+          counterSel.innerHTML = '<option value="">Select shop first...</option>';
+          counterSel.disabled = true;
+        }
+      });
+      
+      // Initially disable counter selection
+      counterSel.disabled = true;
+    }
+  })();
+</script>
+{% endblock %}

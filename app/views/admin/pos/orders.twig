@@ -1,0 +1,367 @@
+{% extends "base.twig" %}
+{% block title %}{% if view_returns %}POS Returns{% else %}POS Orders{% endif %}{% endblock %}
+{% block content %}
+<section class="min-h-screen bg-gray-50 py-8">
+  <div class="container mx-auto px-4 max-w-7xl">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-1">{% if view_returns %}↩️ POS Returns{% else %}📋 POS Orders{% endif %}</h1>
+        <p class="text-sm text-gray-600">{% if view_returns %}View and export POS returns{% else %}View and manage all point of sale orders{% endif %}</p>
+      </div>
+      {% if not view_returns %}
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Gross Total (Filtered)</span>
+            <span class="text-2xl">💰</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">₹{{ (page_totals.gross|default(0))|number_format(2, '.', ',') }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Returns (Filtered)</span>
+            <span class="text-2xl">↩️</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">₹{{ (page_totals.returns|default(0))|number_format(2, '.', ',') }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Net Total (Filtered)</span>
+            <span class="text-2xl">📈</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">₹{{ (page_totals.net|default(0))|number_format(2, '.', ',') }}</p>
+        </div>
+      </div>
+      {% endif %}
+      <div class="flex flex-wrap gap-2">
+        <a href="{{ app_url }}/admin/pos/billing" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          ← Billing
+        </a>
+        <a href="{{ app_url }}/admin/pos/gst-report" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          📊 GST Report
+        </a>
+        <a href="{{ app_url }}/admin/pos/backfill-stock" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          📦 Backfill Stock
+        </a>
+        <a href="{{ app_url }}/admin/pos/populate-products" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          🔄 Populate Products
+        </a>
+        {% if view_returns %}
+        <a href="{{ app_url }}/admin/pos/orders" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          📋 Orders
+        </a>
+        <a href="{{ app_url }}/admin/pos/orders?view=returns&store_id={{ filters.store_id }}&from={{ filters.from }}&to={{ filters.to }}&export=csv" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-black bg-black text-white text-sm font-bold hover:bg-gray-800 hover:border-gray-800 transition-all">
+          ⬇️ Download CSV
+        </a>
+        {% else %}
+        <a href="{{ app_url }}/admin/pos/orders?view=returns" 
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+          ↩️ Returns
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <h2 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+        {% if view_returns %}🔍 Filter Returns{% else %}🔍 Filter Orders{% endif %}
+      </h2>
+      <form method="get" action="{{ app_url }}/admin/pos/orders">
+        {% if view_returns %}
+          <input type="hidden" name="view" value="returns">
+        {% endif %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <!-- Store Filter -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Store</label>
+            <select name="store_id" 
+                    class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+              <option value="">All Stores</option>
+              {% for s in stores %}
+                <option value="{{ s.id }}" {% if filters.store_id == s.id %}selected{% endif %}>
+                  {{ s.code }} — {{ s.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {% if not view_returns %}
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Staff</label>
+              <select name="staff_id" 
+                      class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+                <option value="">All Staff</option>
+                {% for u in staff %}
+                  <option value="{{ u.id }}" {% if filters.staff_id == u.id %}selected{% endif %}>
+                    {{ u.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
+
+          <!-- From Date -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">From Date</label>
+            <input type="date" 
+                   name="from" 
+                   value="{{ filters.from }}"
+                   class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+          </div>
+
+          <!-- To Date -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">To Date</label>
+            <input type="date" 
+                   name="to" 
+                   value="{{ filters.to }}"
+                   class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all outline-none">
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-end">
+            <button type="submit" 
+                    class="w-full px-6 py-2.5 rounded-lg bg-black text-white text-sm font-bold hover:bg-gray-800 transition-all shadow-sm">
+              🔎 Apply Filters
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Orders/Returns Table -->
+    {% if (not view_returns and orders is empty) or (view_returns and returns is empty) %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+        <div class="flex flex-col items-center justify-center text-center">
+          <svg class="w-20 h-20 text-gray-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">{% if view_returns %}No Returns Found{% else %}No Orders Found{% endif %}</h3>
+          <p class="text-sm text-gray-600 mb-4">{% if view_returns %}There are no POS returns matching your filters.{% else %}There are no POS orders matching your filters.{% endif %}</p>
+          <a href="{{ app_url }}/admin/pos/billing" 
+             class="inline-flex items-center px-5 py-2.5 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition-all">
+            ➕ Create New Order
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b-2 border-gray-200">
+                {% if view_returns %}
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Return ID</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Order #</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Customer</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Product</th>
+                  <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Qty</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Refund</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">GST Adj</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
+                  <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                {% else %}
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Order #</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Store</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Customer</th>
+                  <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Total</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Items Preview</th>
+                  <th class="text-left px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
+                  <th class="text-right px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% if view_returns %}
+                {% for r in returns %}
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                      <span class="font-bold text-gray-900 text-sm">RET-{{ r.id }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="font-bold text-gray-900 text-sm">{{ r.order_number }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="font-semibold text-gray-900 text-sm">{{ r.customer_name ?: '—' }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm text-gray-900">{{ r.product_name ?: ('#' ~ r.product_id) }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <span class="font-bold text-gray-900 text-base">{{ r.quantity }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm text-gray-900">{{ r.refund_method }} — ₹{{ r.refund_amount|number_format(2, '.', ',') }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm text-gray-900">₹{{ r.gst_adjustment|number_format(2, '.', ',') }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-1 text-sm text-gray-600">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{ r.created_at }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <a href="{{ app_url }}/admin/pos/orders/{{ r.pos_order_id }}/show" 
+                           class="inline-flex items-center px-3 py-1.5 rounded-lg border-2 border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                          👁️ View Order
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                {% for o in orders %}
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                      <span class="font-bold text-gray-900 text-sm">{{ o.order_number }}</span>
+                      {% if return_counts[o.id] is defined and return_counts[o.id] > 0 %}
+                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold border border-red-200">Returned</span>
+                      {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-700">
+                        {{ o.store_id }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      {% if o.sale_type == 'Online' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-100 border border-blue-200 text-xs font-semibold text-blue-700">Online</span>
+                      {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-xs font-semibold text-gray-700">Shop</span>
+                      {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                      {% if o.customer_name %}
+                        <div class="font-semibold text-gray-900 text-sm">{{ o.customer_name }}</div>
+                        {% if o.customer_phone %}
+                          <div class="text-xs text-gray-500 mt-0.5">📞 {{ o.customer_phone }}</div>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-sm text-gray-400 italic">Walk-in customer</span>
+                      {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <span class="font-bold text-gray-900 text-base">₹{{ o.grand_total|number_format(2, '.', ',') }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-xs text-gray-600 max-w-xs truncate">
+                        {{ previews[o.id]|join(', ') }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-1 text-sm text-gray-600">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{ o.created_at }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <a href="{{ app_url }}/admin/pos/orders/{{ o.id }}/show" 
+                           class="inline-flex items-center px-3 py-1.5 rounded-lg border-2 border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                          👁️ View
+                        </a>
+                        <a href="{{ app_url }}/admin/pos/orders/{{ o.id }}/show?print=1" 
+                           class="inline-flex items-center px-3 py-1.5 rounded-lg border-2 border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                          🖨️ Print
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200 gap-4">
+          <div class="text-sm text-gray-600 font-medium">
+            <span class="font-bold text-gray-900">{{ pagination.total }}</span> {% if view_returns %}total returns{% else %}total orders{% endif %} • 
+            Page <span class="font-bold text-gray-900">{{ pagination.current_page }}</span> of 
+            <span class="font-bold text-gray-900">{{ pagination.total_pages }}</span>
+          </div>
+          <div class="flex gap-2">
+            {% set qs = (view_returns ? 'view=returns&' : '') ~ 'store_id=' ~ (filters.store_id ?? '') ~ (view_returns ? '' : '&staff_id=' ~ (filters.staff_id ?? '')) ~ '&from=' ~ (filters.from ?? '') ~ '&to=' ~ (filters.to ?? '') %}
+            
+            {% if pagination.current_page > 1 %}
+              <a href="{{ app_url }}/admin/pos/orders?{{ qs }}&page={{ pagination.current_page - 1 }}" 
+                 class="inline-flex items-center px-4 py-2 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                ← Previous
+              </a>
+            {% else %}
+              <span class="inline-flex items-center px-4 py-2 rounded-lg border-2 border-gray-200 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                ← Previous
+              </span>
+            {% endif %}
+            
+            {% if pagination.current_page < pagination.total_pages %}
+              <a href="{{ app_url }}/admin/pos/orders?{{ qs }}&page={{ pagination.current_page + 1 }}" 
+                 class="inline-flex items-center px-4 py-2 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                Next →
+              </a>
+            {% else %}
+              <span class="inline-flex items-center px-4 py-2 rounded-lg border-2 border-gray-200 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                Next →
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Total Orders</span>
+            <span class="text-2xl">📋</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">{{ pagination.total }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Current Page</span>
+            <span class="text-2xl">📄</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">{{ pagination.current_page }} / {{ pagination.total_pages }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">Orders/Page</span>
+            <span class="text-2xl">📊</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">{% if view_returns %}{{ returns|length }}{% else %}{{ orders|length }}{% endif %}</p>
+        </div>
+
+        <div class="bg-black rounded-xl shadow-lg p-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-white uppercase tracking-wide">Quick Actions</span>
+            <span class="text-2xl">⚡</span>
+          </div>
+          <a href="{{ app_url }}/admin/pos/billing" 
+             class="inline-flex items-center justify-center w-full px-4 py-2 mt-2 rounded-lg bg-white text-black text-xs font-bold hover:bg-gray-100 transition-all">
+            + New Order
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

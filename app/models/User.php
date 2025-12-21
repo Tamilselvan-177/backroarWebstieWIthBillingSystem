@@ -99,6 +99,13 @@ class User extends BaseModel
         $stmt->execute(['id' => $userId]);
         return $stmt->fetch();
     }
+    public function getStaffUsers()
+    {
+        $sql = "SELECT id, name FROM {$this->table} WHERE role = 'staff' AND is_active = 1 ORDER BY name ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 
     /**
      * Update last login

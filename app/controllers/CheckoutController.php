@@ -73,11 +73,19 @@ class CheckoutController extends BaseController
      */
     public function addAddress()
     {
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
         if (!\isLoggedIn()) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'message' => 'Please login'], 401);
+            }
             return $this->redirect('/login');
         }
 
         if (!\csrf_verify($_POST['_token'] ?? null)) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'message' => 'Session expired. Please refresh.'], 419);
+            }
             \flash('error', 'Session expired.');
             return $this->redirect('/checkout');
         }
@@ -104,14 +112,24 @@ class CheckoutController extends BaseController
           ->custom('pincode', fn($v) => preg_match('/^\d{6}$/', $v), "Pincode must be 6 digits");
 
         if ($v->fails()) {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'errors' => $v->getErrors()]);
+            }
             $_SESSION['errors'] = $v->getErrors();
             $_SESSION['old']    = $data;
             return $this->redirect('/checkout');
         }
 
         if ($this->addressModel->addAddress($data)) {
+            if ($isAjax) {
+                \flash('success', 'Address added'); // Set flash so it shows after reload
+                return $this->json(['success' => true, 'message' => 'Address added']);
+            }
             \flash('success', 'Address added');
         } else {
+            if ($isAjax) {
+                return $this->json(['success' => false, 'message' => 'Failed to add address']);
+            }
             \flash('error', 'Failed to add address');
         }
 

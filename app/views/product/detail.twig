@@ -1117,6 +1117,18 @@
                     <span class="detail-value">{{ product.subcategory_name }}</span>
                 </div>
                 {% endif %}
+                {% if product.brand_name %}
+                <div class="detail-row">
+                    <span class="detail-label">Brand:</span>
+                    <span class="detail-value"><a href="{{ app_url }}/brand/{{ product.brand_slug }}" style="color: var(--accent-color); text-decoration: none;">{{ product.brand_name }}</a></span>
+                </div>
+                {% endif %}
+                {% if product.store_name %}
+                <div class="detail-row">
+                    <span class="detail-label">Shop Name:</span>
+                    <span class="detail-value">{{ product.store_name }}</span>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

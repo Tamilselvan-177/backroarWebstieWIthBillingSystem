@@ -94,10 +94,11 @@ class OrderController extends BaseController
             return $this->redirect('/admin/orders');
         }
 
-        $itemSql = "SELECT oi.*, p.slug AS product_slug, pi.image_path
+        $itemSql = "SELECT oi.*, p.slug AS product_slug, pi.image_path, s.name as store_name
                     FROM order_items oi
                     LEFT JOIN products p ON oi.product_id = p.id
                     LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
+                    LEFT JOIN stores s ON p.store_id = s.id
                     WHERE oi.order_id = {$orderId}";
         $items = $this->orders->query($itemSql);
 
@@ -106,6 +107,90 @@ class OrderController extends BaseController
             'order' => $order,
             'items' => $items
         ]);
+    }
+
+    public function billing($id)
+    {
+        if (empty($_SESSION['pos_active'])) {
+            \flash('error', 'Please login to POS first');
+            return $this->redirect('/admin/pos/login');
+        }
+        
+        $orderId = (int)$id;
+        $orderSql = "SELECT * FROM orders WHERE id = {$orderId}";
+        $order = $this->orders->query($orderSql);
+        $order = $order[0] ?? null;
+
+        if (!$order) {
+            \flash('error', 'Order not found');
+            return $this->redirect('/admin/orders');
+        }
+
+        // Fetch items with product details needed for POS
+        $itemSql = "SELECT oi.*, p.name, p.sale_price, p.price, p.gst_percent, p.store_id, p.no_store_stock
+                    FROM order_items oi
+                    LEFT JOIN products p ON oi.product_id = p.id
+                    WHERE oi.order_id = {$orderId}";
+        $items = $this->orders->query($itemSql);
+
+        if (empty($items)) {
+            \flash('error', 'Order has no items');
+            return $this->redirect('/admin/orders/' . $orderId . '/show');
+        }
+
+        // Clear existing cart
+        $_SESSION['pos_cart'] = [];
+        
+        foreach ($items as $item) {
+            $pid = (int)$item['product_id'];
+            $qty = (int)$item['quantity'];
+            
+            // Use order price if available, or product price
+            $price = (float)$item['price']; // from order_items (price at purchase)
+            
+            $_SESSION['pos_cart'][$pid] = [
+                'product_id' => $pid,
+                'name' => $item['product_name'] ?? $item['name'],
+                'price' => $price,
+                'gst_percent' => (float)($item['gst_percent'] ?? 0),
+                'discount_percent' => 0.0,
+                'quantity' => $qty,
+                'no_store_stock' => (int)($item['no_store_stock'] ?? 0) ? 1 : 0,
+                'store_id' => (int)($item['store_id'] ?? 0)
+            ];
+        }
+
+        // Set customer info - Prioritize shipping details from the order
+        $userName = $order['shipping_name'] ?? '';
+        $userPhone = $order['shipping_phone'] ?? '';
+        
+        // If empty, try to fetch from user profile
+        if ((empty($userName) || empty($userPhone)) && $order['user_id']) {
+            $uSql = "SELECT name, phone FROM users WHERE id = " . (int)$order['user_id'];
+            $u = $this->orders->query($uSql)[0] ?? null;
+            if ($u) {
+                if (empty($userName)) $userName = $u['name'];
+                if (empty($userPhone)) $userPhone = $u['phone'];
+            }
+        }
+        
+        $_SESSION['pos_temp_data'] = [
+            'customer_name' => $userName,
+            'customer_phone' => $userPhone,
+            'staff_id' => 0, // Current admin
+            'cash_amount' => '',
+            'card_amount' => '',
+            'upi_amount' => '',
+            'sale_type' => 'Online'
+        ];
+        
+        $_SESSION['pos_online_order_id'] = $orderId;
+        
+        // Order details loaded - status update will happen upon POS checkout if needed
+        // $this->orders->update($orderId, ['order_status' => 'Confirmed']);
+
+        \flash('success', 'Order loaded into POS');
+        return $this->redirect('/admin/pos/billing');
     }
 
     public function updateStatus($id)

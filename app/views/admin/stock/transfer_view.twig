@@ -1,0 +1,193 @@
+{% extends "base.twig" %}
+{% block title %}Transfer Details — Admin{% endblock %}
+{% block content %}
+<section class="min-h-screen bg-gray-50 py-8">
+  <div class="container mx-auto px-4 max-w-5xl">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div class="flex items-start gap-4">
+        <a href="{{ app_url }}/admin/stock/transfer/history"
+           class="inline-flex items-center px-4 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all mt-1">
+          ← Back to History
+        </a>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            Transfer Details
+          </p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-1">
+            {{ transfer.transfer_number }}
+          </h1>
+          <p class="text-sm text-gray-600">View complete transfer information</p>
+        </div>
+      </div>
+      
+      {% if transfer.status == 'COMPLETED' %}
+        <span class="px-4 py-2 rounded-lg bg-green-100 text-green-700 text-sm font-bold">
+          ✓ Completed
+        </span>
+      {% elseif transfer.status == 'PENDING' %}
+        <span class="px-4 py-2 rounded-lg bg-yellow-100 text-yellow-700 text-sm font-bold">
+          ⏳ Pending
+        </span>
+      {% else %}
+        <span class="px-4 py-2 rounded-lg bg-red-100 text-red-700 text-sm font-bold">
+          ✗ Cancelled
+        </span>
+      {% endif %}
+    </div>
+
+    <!-- Transfer Info Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+        <h2 class="text-base font-bold text-gray-900">Transfer Information</h2>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Source Store -->
+          <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+            <p class="text-xs font-bold text-blue-700 uppercase tracking-wide mb-2">From (Source)</p>
+            <p class="text-lg font-bold text-blue-900">{{ transfer.source_name }}</p>
+          </div>
+
+          <!-- Destination Store -->
+          <div class="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+            <p class="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">To (Destination)</p>
+            <p class="text-lg font-bold text-green-900">{{ transfer.dest_name }}</p>
+          </div>
+
+          <!-- Date & Time -->
+          <div class="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+            <p class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Transfer Date</p>
+            <p class="text-base font-bold text-gray-900">{{ transfer.created_at|date('F d, Y') }}</p>
+            <p class="text-sm text-gray-600 mt-1">{{ transfer.created_at|date('g:i A') }}</p>
+            {% if transfer.completed_at %}
+              <p class="text-xs text-gray-500 mt-2">Completed: {{ transfer.completed_at|date('M d, Y g:i A') }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Initiated By -->
+          <div class="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+            <p class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Initiated By</p>
+            <p class="text-base font-bold text-gray-900">{{ transfer.user_name ?? 'System' }}</p>
+            <p class="text-sm text-gray-600 mt-1">Total Items: {{ transfer.total_items }}</p>
+          </div>
+        </div>
+
+        {% if transfer.notes %}
+        <div class="mt-6 bg-yellow-50 rounded-lg p-4 border-2 border-yellow-200">
+          <p class="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-2">Notes</p>
+          <p class="text-sm text-gray-700">{{ transfer.notes }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Transfer Items -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b-2 border-gray-200 bg-gray-50">
+        <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+          📦 Transferred Products
+          <span class="ml-auto text-xs font-semibold px-3 py-1 rounded-full bg-black text-white">
+            {{ items|length }} items
+          </span>
+        </h2>
+      </div>
+      
+      {% if items and items|length > 0 %}
+      <div class="p-6">
+        <div class="space-y-4">
+          {% for item in items %}
+          <div class="flex gap-4 items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-gray-300 transition-all">
+            {% if item.image_path %}
+              <img src="{{ item.image_path }}" 
+                   alt="{{ item.name }}" 
+                   class="w-20 h-20 rounded-lg object-cover border-2 border-white shadow-sm" />
+            {% else %}
+              <div class="w-20 h-20 rounded-lg bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center flex-shrink-0">
+                <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+            {% endif %}
+            
+            <div class="flex-1">
+              <p class="text-lg font-bold text-gray-900">{{ item.name }}</p>
+              <div class="flex gap-4 mt-2 text-xs text-gray-600">
+                {% if item.sku %}
+                  <span class="font-semibold">SKU: {{ item.sku }}</span>
+                {% endif %}
+                {% if item.barcode %}
+                  <span class="font-semibold">Barcode: {{ item.barcode }}</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="text-right">
+              <div class="px-4 py-2 rounded-lg bg-blue-100 border-2 border-blue-200">
+                <p class="text-2xl font-bold text-blue-900">{{ item.quantity }}</p>
+                <p class="text-xs font-semibold text-blue-700">units</p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Summary -->
+        <div class="mt-6 pt-6 border-t-2 border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-base font-bold text-gray-900">Total Transfer Summary</p>
+              <p class="text-sm text-gray-600 mt-1">All items have been successfully transferred</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold text-gray-600">Total Items</p>
+              <p class="text-3xl font-bold text-gray-900">{{ items|length }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="p-12 text-center">
+        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <p class="text-gray-500 font-medium">No items found</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-6 flex justify-between items-center">
+      <a href="{{ app_url }}/admin/stock/transfer/history"
+         class="inline-flex items-center px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+        ← Back to History
+      </a>
+      
+      <button onclick="window.print()" 
+              class="inline-flex items-center px-6 py-3 rounded-lg bg-black text-white text-sm font-bold hover:bg-gray-800 transition-all">
+        🖨️ Print Transfer
+      </button>
+    </div>
+  </div>
+</section>
+
+<style media="print">
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    section, section * {
+      visibility: visible;
+    }
+    section {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    button, a {
+      display: none !important;
+    }
+  }
+</style>
+{% endblock %}
