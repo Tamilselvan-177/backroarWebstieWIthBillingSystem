@@ -12,7 +12,7 @@ class Database
 
     private function __construct()
     {
-        $config = require __DIR__ . '/../app/config/database.php';
+        $config = require __DIR__ . '/../App/config/database.php';
         
         try {
             $dsn = "{$config['driver']}:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}";
