@@ -15,7 +15,7 @@ class Product extends BaseModel
         } catch (\Exception $e) {
             return [
                 'id','name','category_id','subcategory_id','brand_id','model_id','store_id',
-                'price','sale_price','stock_quantity','barcode','gst_percent','is_featured',
+                'price','store_price','sale_price','stock_quantity','barcode','gst_percent','is_featured',
                 'is_active','no_store_stock','description','slug','created_at','updated_at'
             ];
         }
@@ -331,19 +331,20 @@ public function getFeatured($limit = 8)
     public function searchForStore(string $keyword, int $storeId, int $limit = 20): array
     {
         $kw = '%' . $keyword . '%';
-        $sql = "SELECT 
-                    p.*, 
-                    pi.image_path, 
-                    ss.quantity AS available
-                FROM store_stock ss
-                JOIN products p ON p.id = ss.product_id
-                LEFT JOIN product_images pi 
-                    ON p.id = pi.product_id AND pi.is_primary = 1
-                WHERE ss.store_id = :store_id
-                  AND ss.quantity > 0
-                  AND p.no_store_stock = 0
-                  AND p.name LIKE :kw
-                LIMIT {$limit}";
+                $sql = "SELECT 
+                                        p.*, 
+                                        COALESCE(p.store_price, p.sale_price, p.price) AS price,
+                                        pi.image_path, 
+                                        ss.quantity AS available
+                                FROM store_stock ss
+                                JOIN products p ON p.id = ss.product_id
+                                LEFT JOIN product_images pi 
+                                        ON p.id = pi.product_id AND pi.is_primary = 1
+                                WHERE ss.store_id = :store_id
+                                    AND ss.quantity > 0
+                                    AND p.no_store_stock = 0
+                                    AND p.name LIKE :kw
+                                LIMIT {$limit}";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['store_id' => $storeId, 'kw' => $kw]);
         return $stmt->fetchAll();
@@ -354,7 +355,7 @@ public function getFeatured($limit = 8)
         $kw = '%' . $keyword . '%';
         $sql = "SELECT 
                     p.id, p.name,
-                    COALESCE(p.sale_price, p.price) AS price,
+                    COALESCE(p.store_price, p.sale_price, p.price) AS price,
                     COALESCE(p.gst_percent, 0) AS gst_percent,
                     ss.quantity AS available,
                     pi.image_path

@@ -1,0 +1,298 @@
+addresses	id	int unsigned	NO	PRI		auto_increment
+addresses	user_id	int unsigned	NO	MUL		
+addresses	full_name	varchar(100)	NO			
+addresses	phone	varchar(15)	NO			
+addresses	address_line1	varchar(255)	NO			
+addresses	address_line2	varchar(255)	YES			
+addresses	city	varchar(100)	NO			
+addresses	state	varchar(100)	NO			
+addresses	pincode	varchar(10)	NO			
+addresses	is_default	tinyint(1)	YES	MUL	0	
+addresses	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+bill_sequences	id	int unsigned	NO	PRI		auto_increment
+bill_sequences	store_id	int unsigned	NO	MUL		
+bill_sequences	financial_year	varchar(9)	NO			
+bill_sequences	current_seq	int unsigned	NO		0	
+bill_sequences	prefix	varchar(20)	YES		POS	
+bill_sequences	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+brands	id	int unsigned	NO	PRI		auto_increment
+brands	name	varchar(100)	NO	UNI		
+brands	slug	varchar(100)	NO	UNI		
+brands	logo_path	varchar(255)	YES			
+brands	is_active	tinyint(1)	YES	MUL	1	
+brands	display_order	int	YES		0	
+brands	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+cart_items	id	int unsigned	NO	PRI		auto_increment
+cart_items	user_id	int unsigned	NO	MUL		
+cart_items	product_id	int unsigned	NO	MUL		
+cart_items	quantity	int	YES		1	
+cart_items	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+cart_items	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+categories	id	int unsigned	NO	PRI		auto_increment
+categories	name	varchar(100)	NO			
+categories	slug	varchar(100)	NO	UNI		
+categories	description	text	YES			
+categories	image_path	varchar(255)	YES			
+categories	is_active	tinyint(1)	YES	MUL	1	
+categories	display_order	int	YES		0	
+categories	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+counter_staff	id	int unsigned	NO	PRI		auto_increment
+counter_staff	counter_id	int unsigned	NO	MUL		
+counter_staff	user_id	int unsigned	NO	MUL		
+counter_staff	assigned_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+counters	id	int unsigned	NO	PRI		auto_increment
+counters	store_id	int unsigned	NO	MUL		
+counters	code	varchar(20)	NO	UNI		
+counters	name	varchar(100)	NO			
+counters	pin_hash	varchar(255)	NO			
+counters	is_active	tinyint(1)	YES	MUL	1	
+counters	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+counters	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+coupon_usages	id	int unsigned	NO	PRI		auto_increment
+coupon_usages	coupon_id	int unsigned	NO	MUL		
+coupon_usages	user_id	int unsigned	NO	MUL		
+coupon_usages	order_id	int unsigned	YES	MUL		
+coupon_usages	used_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+coupons	id	int unsigned	NO	PRI		auto_increment
+coupons	code	varchar(50)	NO	UNI		
+coupons	type	enum('PERCENT','FIXED')	NO			
+coupons	value	decimal(10,2)	NO			
+coupons	max_discount_amount	decimal(10,2)	YES			
+coupons	min_order_amount	decimal(10,2)	YES		0.00	
+coupons	valid_from	datetime	NO			
+coupons	valid_to	datetime	NO			
+coupons	is_active	tinyint(1)	YES	MUL	1	
+coupons	usage_limit_global	int	YES			
+coupons	usage_limit_per_user	int	YES			
+coupons	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+customer_ledger	id	int unsigned	NO	PRI		auto_increment
+customer_ledger	store_id	int unsigned	NO	MUL		
+customer_ledger	customer_phone	varchar(15)	NO	MUL		
+customer_ledger	customer_name	varchar(100)	YES			
+customer_ledger	order_id	int unsigned	YES	MUL		
+customer_ledger	debit	decimal(10,2)	YES		0.00	
+customer_ledger	credit	decimal(10,2)	YES		0.00	
+customer_ledger	balance	decimal(10,2)	YES		0.00	
+customer_ledger	due_date	date	YES			
+customer_ledger	notes	varchar(255)	YES			
+customer_ledger	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+models	id	int unsigned	NO	PRI		auto_increment
+models	brand_id	int unsigned	NO	MUL		
+models	name	varchar(100)	NO			
+models	slug	varchar(150)	NO	UNI		
+models	model_number	varchar(50)	YES			
+models	is_active	tinyint(1)	YES	MUL	1	
+models	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+order_items	id	int unsigned	NO	PRI		auto_increment
+order_items	order_id	int unsigned	NO	MUL		
+order_items	product_id	int unsigned	NO	MUL		
+order_items	product_name	varchar(255)	NO			
+order_items	price	decimal(10,2)	NO			
+order_items	quantity	int	NO			
+order_items	subtotal	decimal(10,2)	NO			
+order_items	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+orders	id	int unsigned	NO	PRI		auto_increment
+orders	user_id	int unsigned	NO	MUL		
+orders	order_number	varchar(50)	NO	UNI		
+orders	subtotal	decimal(10,2)	NO			
+orders	shipping_charge	decimal(10,2)	YES		0.00	
+orders	total_amount	decimal(10,2)	NO			
+orders	payment_method	enum('COD','Online')	YES		COD	
+orders	payment_status	enum('Pending','Paid','Failed')	YES	MUL	Pending	
+orders	order_status	enum('Pending','Confirmed','Processing','Shipped','Delivered','Cancelled')	YES	MUL	Pending	
+orders	shipping_name	varchar(100)	NO			
+orders	shipping_phone	varchar(15)	NO			
+orders	shipping_address	text	NO			
+orders	shipping_city	varchar(100)	NO			
+orders	shipping_state	varchar(100)	NO			
+orders	shipping_pincode	varchar(10)	NO			
+orders	notes	text	YES			
+orders	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+orders	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+orders	coupon_id	int unsigned	YES	MUL		
+orders	coupon_code	varchar(50)	YES			
+orders	discount_amount	decimal(10,2)	YES		0.00	
+payment_logs	id	int unsigned	NO	PRI		auto_increment
+payment_logs	order_id	int unsigned	NO	MUL		
+payment_logs	payment_method	varchar(50)	YES			
+payment_logs	transaction_id	varchar(255)	YES	MUL		
+payment_logs	amount	decimal(10,2)	YES			
+payment_logs	status	enum('Success','Failed','Pending')	YES		Pending	
+payment_logs	response_data	text	YES			
+payment_logs	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+pos_cash_drawer_events	id	int unsigned	NO	PRI		auto_increment
+pos_cash_drawer_events	session_id	int unsigned	NO	MUL		
+pos_cash_drawer_events	event_type	enum('OPEN','CLOSE','PAID_IN','PAID_OUT','KICK')	NO	MUL		
+pos_cash_drawer_events	amount	decimal(10,2)	YES			
+pos_cash_drawer_events	reason	varchar(255)	YES			
+pos_cash_drawer_events	order_id	int unsigned	YES	MUL		
+pos_cash_drawer_events	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+pos_cash_drawer_sessions	id	int unsigned	NO	PRI		auto_increment
+pos_cash_drawer_sessions	store_id	int unsigned	NO	MUL		
+pos_cash_drawer_sessions	counter_id	int unsigned	YES	MUL		
+pos_cash_drawer_sessions	staff_id	int unsigned	YES	MUL		
+pos_cash_drawer_sessions	opening_amount	decimal(10,2)	NO		0.00	
+pos_cash_drawer_sessions	opening_notes	varchar(255)	YES			
+pos_cash_drawer_sessions	started_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+pos_cash_drawer_sessions	closed_at	timestamp	YES			
+pos_cash_drawer_sessions	closing_amount	decimal(10,2)	NO		0.00	
+pos_cash_drawer_sessions	variance	decimal(10,2)	NO		0.00	
+pos_holds	id	int unsigned	NO	PRI		auto_increment
+pos_holds	store_id	int unsigned	NO	MUL		
+pos_holds	counter_id	int unsigned	YES	MUL		
+pos_holds	staff_id	int unsigned	YES	MUL		
+pos_holds	customer_name	varchar(100)	YES			
+pos_holds	customer_phone	varchar(15)	YES			
+pos_holds	cart_json	longtext	NO			
+pos_holds	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+pos_order_items	id	int unsigned	NO	PRI		auto_increment
+pos_order_items	pos_order_id	int unsigned	NO	MUL		
+pos_order_items	product_id	int unsigned	NO	MUL		
+pos_order_items	product_name	varchar(255)	NO			
+pos_order_items	price	decimal(10,2)	NO			
+pos_order_items	quantity	int	NO			
+pos_order_items	discount_percent	decimal(5,2)	NO		0.00	
+pos_order_items	gst_percent	decimal(5,2)	NO		0.00	
+pos_order_items	gst_amount	decimal(10,2)	NO		0.00	
+pos_order_items	subtotal	decimal(10,2)	NO			
+pos_order_items	line_total	decimal(10,2)	NO			
+pos_order_items	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+pos_orders	id	int unsigned	NO	PRI		auto_increment
+pos_orders	order_number	varchar(50)	NO	UNI		
+pos_orders	store_id	int unsigned	NO	MUL		
+pos_orders	financial_year	varchar(9)	NO	MUL		
+pos_orders	customer_name	varchar(100)	YES			
+pos_orders	customer_phone	varchar(15)	YES			
+pos_orders	staff_id	int unsigned	YES	MUL		
+pos_orders	subtotal	decimal(10,2)	NO		0.00	
+pos_orders	discount_total	decimal(10,2)	NO		0.00	
+pos_orders	service_charge	decimal(10,2)	NO		0.00	
+pos_orders	gst_total	decimal(10,2)	NO		0.00	
+pos_orders	grand_total	decimal(10,2)	NO		0.00	
+pos_orders	tendered_amount	decimal(10,2)	NO		0.00	
+pos_orders	change_amount	decimal(10,2)	NO		0.00	
+pos_orders	cash_amount	decimal(10,2)	NO		0.00	
+pos_orders	card_amount	decimal(10,2)	NO		0.00	
+pos_orders	upi_amount	decimal(10,2)	NO		0.00	
+pos_orders	payments_json	text	YES			
+pos_orders	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+pos_orders	change_breakdown_json	text	YES			
+pos_orders	sale_type	enum('Shop','Online')	YES		Shop	
+pos_orders	online_order_id	int	YES			
+product_images	id	int unsigned	NO	PRI		auto_increment
+product_images	product_id	int unsigned	NO	MUL		
+product_images	image_path	varchar(255)	NO			
+product_images	is_primary	tinyint(1)	YES	MUL	0	
+product_images	display_order	int	YES		0	
+product_images	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+products	id	int unsigned	NO	PRI		auto_increment
+products	category_id	int unsigned	NO	MUL		
+products	subcategory_id	int unsigned	YES	MUL		
+products	brand_id	int unsigned	YES	MUL		
+products	model_id	int unsigned	YES	MUL		
+products	store_id	int	YES			
+products	name	varchar(255)	NO			
+products	slug	varchar(255)	NO	UNI		
+products	description	text	YES			
+products	price	decimal(10,2)	NO	MUL		
+products	sale_price	decimal(10,2)	YES			
+products	cost_price	decimal(10,2)	YES			
+products	sku	varchar(100)	YES	UNI		
+products	stock_quantity	int	YES		0	
+products	is_featured	tinyint(1)	YES	MUL	0	
+products	is_active	tinyint(1)	YES	MUL	1	
+products	no_store_stock	tinyint(1)	NO		0	
+products	meta_title	varchar(255)	YES			
+products	meta_description	text	YES			
+products	hsn_code	varchar(20)	YES			
+products	discount_allowed	tinyint(1)	YES		1	
+products	gst_percent	decimal(5,2)	YES		0.00	
+products	barcode	varchar(64)	YES	UNI		
+products	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+products	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+returns	id	int unsigned	NO	PRI		auto_increment
+returns	store_id	int unsigned	NO	MUL		
+returns	product_id	int unsigned	NO	MUL		
+returns	quantity	int	NO			
+returns	refund_method	varchar(20)	NO			
+returns	refund_amount	decimal(10,2)	NO		0.00	
+returns	gst_adjustment	decimal(10,2)	NO		0.00	
+returns	reason	varchar(255)	YES			
+returns	pos_order_id	int unsigned	YES	MUL		
+returns	pos_order_item_id	int unsigned	YES	MUL		
+returns	order_id	int unsigned	YES	MUL		
+returns	order_item_id	int unsigned	YES	MUL		
+returns	created_at	timestamp	YES	MUL	CURRENT_TIMESTAMP	DEFAULT_GENERATED
+reviews	id	int unsigned	NO	PRI		auto_increment
+reviews	user_id	int unsigned	NO	MUL		
+reviews	product_id	int unsigned	NO	MUL		
+reviews	rating	tinyint unsigned	NO			
+reviews	title	varchar(150)	YES			
+reviews	comment	text	YES			
+reviews	status	enum('Pending','Approved','Rejected')	YES	MUL	Pending	
+reviews	is_verified_purchase	tinyint(1)	YES		0	
+reviews	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+reviews	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+stock_movements	id	int unsigned	NO	PRI		auto_increment
+stock_movements	store_id	int unsigned	NO	MUL		
+stock_movements	product_id	int unsigned	NO	MUL		
+stock_movements	quantity	int	NO			
+stock_movements	direction	enum('OUT','IN')	NO			
+stock_movements	reason	enum('SALE','RETURN','ADJUST','WASTAGE','TRANSFER')	NO	MUL		
+stock_movements	reference_type	varchar(50)	YES			
+stock_movements	reference_id	int unsigned	YES			
+stock_movements	notes	varchar(255)	YES			
+stock_movements	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+stock_transfer_items	id	int unsigned	NO	PRI		auto_increment
+stock_transfer_items	transfer_id	int unsigned	NO	MUL		
+stock_transfer_items	product_id	int unsigned	NO	MUL		
+stock_transfer_items	quantity	int	NO			
+stock_transfer_items	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+stock_transfers	id	int unsigned	NO	PRI		auto_increment
+stock_transfers	transfer_number	varchar(50)	NO	UNI		
+stock_transfers	source_store_id	int unsigned	NO	MUL		
+stock_transfers	dest_store_id	int unsigned	NO	MUL		
+stock_transfers	initiated_by	int unsigned	NO	MUL		
+stock_transfers	status	enum('PENDING','COMPLETED','CANCELLED')	NO	MUL	PENDING	
+stock_transfers	total_items	int	NO		0	
+stock_transfers	notes	text	YES			
+stock_transfers	created_at	timestamp	YES	MUL	CURRENT_TIMESTAMP	DEFAULT_GENERATED
+stock_transfers	completed_at	timestamp	YES			
+store_stock	id	int unsigned	NO	PRI		auto_increment
+store_stock	store_id	int unsigned	NO	MUL		
+store_stock	product_id	int unsigned	NO	MUL		
+store_stock	quantity	int	NO		0	
+store_stock	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+stores	id	int unsigned	NO	PRI		auto_increment
+stores	code	varchar(10)	NO	UNI		
+stores	name	varchar(100)	NO			
+stores	address	varchar(255)	YES			
+stores	city	varchar(100)	YES			
+stores	state	varchar(100)	YES			
+stores	pincode	varchar(10)	YES			
+stores	gstin	varchar(20)	YES			
+stores	is_active	tinyint(1)	YES	MUL	1	
+stores	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+stores	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+subcategories	id	int unsigned	NO	PRI		auto_increment
+subcategories	category_id	int unsigned	NO	MUL		
+subcategories	name	varchar(100)	NO			
+subcategories	slug	varchar(100)	NO	UNI		
+subcategories	description	text	YES			
+subcategories	is_active	tinyint(1)	YES	MUL	1	
+subcategories	display_order	int	YES		0	
+subcategories	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+users	id	int unsigned	NO	PRI		auto_increment
+users	name	varchar(100)	NO			
+users	email	varchar(100)	NO	UNI		
+users	phone	varchar(15)	YES			
+users	password	varchar(255)	NO			
+users	role	enum('customer','admin','staff')	YES	MUL	customer	
+users	is_active	tinyint(1)	YES		1	
+users	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+users	updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+wishlists	id	int unsigned	NO	PRI		auto_increment
+wishlists	user_id	int unsigned	NO	MUL		
+wishlists	product_id	int unsigned	NO	MUL		
+wishlists	notes	varchar(255)	YES			
+wishlists	created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED

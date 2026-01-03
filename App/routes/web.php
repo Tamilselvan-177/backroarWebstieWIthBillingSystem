@@ -12,6 +12,7 @@ use App\Controllers\Admin\ImageController as AdminImageController;
 use App\Controllers\Admin\ProductController as AdminProductController;
 use App\Controllers\Admin\OrderController as AdminOrderController;
 use App\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Controllers\Admin\HelpController as AdminHelpController;
 use App\Middleware\AdminMiddleware;
 use App\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Controllers\Admin\BrandController as AdminBrandController;
@@ -109,6 +110,7 @@ $router->guardPrefix('/admin', AdminMiddleware::class);
 
 // ADMIN DASHBOARD
 $router->get('/admin', AdminDashboardController::class, 'index');
+$router->get('/admin/help', AdminHelpController::class, 'index');
 
 // ADMIN POS
 $router->get('/admin/pos/login', AdminPosController::class, 'loginForm');

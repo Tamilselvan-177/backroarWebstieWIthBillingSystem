@@ -1,0 +1,181 @@
+{% extends 'base.twig' %}
+
+{% block title %}{{ title }} — Admin{% endblock %}
+
+{% block styles %}
+<style>
+  @keyframes adminFadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+  .admin-shell { background: radial-gradient(circle at top, #f9fafb 0%, #e5e7eb 40%, #f3f4f6 100%); min-height: calc(100vh - 64px); }
+  .admin-panel { animation: adminFadeUp .4s ease-out; }
+  .admin-card { background:#ffffff; border-radius:1.1rem; box-shadow:0 18px 40px rgba(15,23,42,0.12),0 0 0 1px rgba(148,163,184,0.25); border:1px solid rgba(148,163,184,0.5); }
+  .admin-pill { font-size:.7rem; text-transform:uppercase; letter-spacing:.18em; color:#6b7280; }
+  .help-title { font-size:1.1rem; font-weight:700; color:#111827; }
+  .help-sub { font-size:.85rem; color:#6b7280; }
+  .help-badge { font-size:.7rem; padding:.2rem .6rem; border-radius:999px; background:#020617; color:#fff; text-transform:uppercase; letter-spacing:.16em; }
+  .help-section h2 { font-size:1rem; font-weight:700; color:#111827; }
+  .help-section p { font-size:.9rem; color:#4b5563; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-shell py-8">
+  <div class="container mx-auto px-4 admin-panel">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <a href="{{ app_url }}/admin"
+           class="px-3 py-1 rounded-full border border-[var(--card-border)] text-[11px] font-semibold text-gray-600 hover:bg-[var(--card-bg-alt)]">← Dashboard</a>
+        <div>
+          <p class="admin-pill mb-1">Admin / Help</p>
+          <h1 class="text-2xl md:text-3xl font-black tracking-[0.14em] uppercase text-[var(--brand-heading)]">{{ title }}</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>POS Billing</h2>
+          <span class="help-badge">Sales</span>
+        </div>
+        <p class="help-sub mb-2">Opens billing for in-shop or online packed orders.</p>
+        <p class="mb-2"><strong>What it does:</strong> Starts POS session, adds products, applies discounts, calculates GST, and prints bill.</p>
+        <p class="mb-2"><strong>How to use:</strong> Click <a class="link-accent" href="{{ app_url }}/admin/pos/login">Open POS</a>, select store/counter, scan or search products, set quantities and discounts, then Checkout.</p>
+        <p><strong>Why useful:</strong> Fast, keyboard-friendly checkout with accurate totals and tax.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Orders</h2>
+          <span class="help-badge">Operations</span>
+        </div>
+        <p class="help-sub mb-2">Manage online orders received from the website.</p>
+        <p class="mb-2"><strong>What it does:</strong> Lists orders, shows details, updates status, and transfers items to POS billing.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/orders">Orders</a>, click an order, use “Process Billing” to auto-load items into POS for packing and printing.</p>
+        <p><strong>Why useful:</strong> Eliminates manual re-entry for online orders and keeps records consistent.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Products</h2>
+          <span class="help-badge">Catalog</span>
+        </div>
+        <p class="help-sub mb-2">Create and manage items available for sale.</p>
+        <p class="mb-2"><strong>What it does:</strong> Adds products with price, stock, images, and visibility settings.</p>
+        <p class="mb-2"><strong>How to use:</strong> Go to <a class="link-accent" href="{{ app_url }}/admin/products">Products</a>, use “+ New product”, fill details, upload images, and save.</p>
+        <p><strong>Why useful:</strong> Keeps the storefront and POS in sync with accurate information.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Categories</h2>
+          <span class="help-badge">Structure</span>
+        </div>
+        <p class="help-sub mb-2">Organize products into groups for browsing and filters.</p>
+        <p class="mb-2"><strong>What it does:</strong> Creates and edits categories and subcategories.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/categories">Categories</a> or <a class="link-accent" href="{{ app_url }}/admin/subcategories">Subcategories</a>, add or edit entries.</p>
+        <p><strong>Why useful:</strong> Improves customer navigation and product discovery.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Brands & Models</h2>
+          <span class="help-badge">Filters</span>
+        </div>
+        <p class="help-sub mb-2">Set brand and device model filters for products.</p>
+        <p class="mb-2"><strong>What it does:</strong> Links products to brands and models for precise filtering.</p>
+        <p class="mb-2"><strong>How to use:</strong> Use <a class="link-accent" href="{{ app_url }}/admin/brands">Brands</a> and <a class="link-accent" href="{{ app_url }}/admin/models">Models</a> to configure associations.</p>
+        <p><strong>Why useful:</strong> Helps customers find compatible items quickly.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Stores</h2>
+          <span class="help-badge">Multi-shop</span>
+        </div>
+        <p class="help-sub mb-2">Manage physical store locations used by POS and stock.</p>
+        <p class="mb-2"><strong>What it does:</strong> Adds stores with codes, names, and addresses; enables or disables stores.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/stores">Stores</a>, create or edit entries, toggle active state as needed.</p>
+        <p><strong>Why useful:</strong> Ensures correct mapping of sales and inventory to branches.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Counters & Staff</h2>
+          <span class="help-badge">Access</span>
+        </div>
+        <p class="help-sub mb-2">Configure billing counters and staff user accounts.</p>
+        <p class="mb-2"><strong>What it does:</strong> Creates counters for POS sessions and staff with login access.</p>
+        <p class="mb-2"><strong>How to use:</strong> Use <a class="link-accent" href="{{ app_url }}/admin/counters">Counters</a> to add counters and <a class="link-accent" href="{{ app_url }}/admin/staff">Staff</a> to manage users.</p>
+        <p><strong>Why useful:</strong> Controls who can bill and where, improving security and tracking.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Stock Transfer</h2>
+          <span class="help-badge">Inventory</span>
+        </div>
+        <p class="help-sub mb-2">Move items between stores or central stock.</p>
+        <p class="mb-2"><strong>What it does:</strong> Adds items to a transfer cart, executes bulk moves, and tracks history.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/stock/transfer">Stock Transfer</a>, add items, and perform transfer.</p>
+        <p><strong>Why useful:</strong> Keeps stock levels accurate across locations.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Coupons</h2>
+          <span class="help-badge">Marketing</span>
+        </div>
+        <p class="help-sub mb-2">Create discount codes for promotions.</p>
+        <p class="mb-2"><strong>What it does:</strong> Adds, edits, activates, and deactivates coupons used at checkout.</p>
+        <p class="mb-2"><strong>How to use:</strong> Go to <a class="link-accent" href="{{ app_url }}/admin/coupons">Coupons</a>, create codes and configure validity.</p>
+        <p><strong>Why useful:</strong> Drives sales while keeping control over discounts.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Returns</h2>
+          <span class="help-badge">Service</span>
+        </div>
+        <p class="help-sub mb-2">Process product returns and refunds.</p>
+        <p class="mb-2"><strong>What it does:</strong> Records returned items, calculates refund, and updates stock where applicable.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/returns">Returns</a>, search bill, select items, and finalize refund.</p>
+        <p><strong>Why useful:</strong> Standardizes after-sales operations with clear records.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Image Manager</h2>
+          <span class="help-badge">Media</span>
+        </div>
+        <p class="help-sub mb-2">Upload and manage product images.</p>
+        <p class="mb-2"><strong>What it does:</strong> Uploads images, sets primary image, and reorders gallery.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open any product’s image manager, upload files, drag to reorder, set as primary.</p>
+        <p><strong>Why useful:</strong> Improves storefront presentation and conversion.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Reviews</h2>
+          <span class="help-badge">Trust</span>
+        </div>
+        <p class="help-sub mb-2">Moderate customer reviews.</p>
+        <p class="mb-2"><strong>What it does:</strong> Approves, hides, or deletes reviews, and manages spam.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/reviews">Reviews</a>, review entries, apply status or removal.</p>
+        <p><strong>Why useful:</strong> Maintains credible customer feedback on products.</p>
+      </div>
+
+      <div class="admin-card p-6 help-section">
+        <div class="flex items-center justify-between mb-3">
+          <h2>Analytics</h2>
+          <span class="help-badge">Insights</span>
+        </div>
+        <p class="help-sub mb-2">View sales, tax, returns, and top products.</p>
+        <p class="mb-2"><strong>What it does:</strong> Shows trends, payment methods, store performance, and low stock alerts.</p>
+        <p class="mb-2"><strong>How to use:</strong> Open <a class="link-accent" href="{{ app_url }}/admin/analytics">Analytics</a> to monitor daily performance.</p>
+        <p><strong>Why useful:</strong> Helps plan staffing, promotions, and inventory decisions.</p>
+      </div>
+    </div>
+  </div>
+ </section>
+{% endblock %}
+

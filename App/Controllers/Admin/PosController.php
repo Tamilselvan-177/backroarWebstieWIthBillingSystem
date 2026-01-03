@@ -669,7 +669,7 @@ class PosController extends BaseController
         $_SESSION['pos_cart'][$pid] = [
             'product_id' => $pid,
             'name' => $product['name'],
-            'price' => (float)($product['sale_price'] ?? $product['price']),
+            'price' => (float)($product['store_price'] ?? $product['sale_price'] ?? $product['price']),
             'gst_percent' => (float)($product['gst_percent'] ?? 0),
             'discount_percent' => 0.0,
             'quantity' => $newQty,
