@@ -185,11 +185,10 @@
         .fade-out {
             animation: fadeOut 0.8s 3.5s ease-out forwards;
         }
-
-        #main-content {
-            opacity: 0;
-            animation: contentFadeIn 0.8s 4s ease-out forwards;
-        }
+#main-content {
+    opacity: 1;
+    animation: none;
+}
 
         @keyframes contentFadeIn {
             to {
@@ -357,25 +356,7 @@
 
 <body class="bg-[var(--brand-bg)]">
     <!-- ========== MARVEL INTRO ========== -->
-    <div id="marvel-intro" class="fade-out">
-        <div class="intro-container">
-            <!-- Particles Background -->
-            <div class="particles" id="particles"></div>
-            
-            <!-- Radial Burst -->
-            <div class="radial-burst" id="radialBurst"></div>
-            
-            <!-- Logo -->
-            <div class="logo-wrapper">
-                <img src="{{ app_url }}/public/images/logo.png" 
-                     alt="BackRoar" 
-                     class="logo-image">
-            </div>
-            
-            <!-- Brand Text -->
-            <div class="brand-text">BackRoar</div>
-        </div>
-    </div>
+   
     <!-- ========== END MARVEL INTRO ========== -->
 
     <!-- ========== MAIN CONTENT WRAPPER ========== -->
@@ -606,49 +587,7 @@
     <!-- ========== END MAIN CONTENT WRAPPER ========== -->
 
     <!-- ========== MARVEL INTRO SCRIPT ========== -->
-    <script>
-        // Check if intro has been shown in this session
-        const hasSeenIntro = sessionStorage.getItem('blackroar_intro_shown');
-        
-        if (hasSeenIntro) {
-            // Skip intro if already shown
-            document.getElementById('marvel-intro').style.display = 'none';
-            document.getElementById('main-content').style.opacity = '1';
-            document.getElementById('main-content').style.animation = 'none';
-        } else {
-            // Show intro and mark as shown
-            sessionStorage.setItem('blackroar_intro_shown', 'true');
-            
-            // Generate particles
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.width = Math.random() * 4 + 1 + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 2 + 's';
-                particle.style.animationDuration = Math.random() * 3 + 2 + 's';
-                particlesContainer.appendChild(particle);
-            }
-            
-            // Generate radial burst lines
-            const burstContainer = document.getElementById('radialBurst');
-            for (let i = 0; i < 24; i++) {
-                const line = document.createElement('div');
-                line.className = 'burst-line';
-                line.style.transform = `rotate(${i * 15}deg)`;
-                line.style.animationDelay = '1s';
-                burstContainer.appendChild(line);
-            }
-            
-            // Remove intro after animation completes
-            setTimeout(() => {
-                document.getElementById('marvel-intro').remove();
-            }, 4800);
-        }
-    </script>
+   
     <!-- ========== END MARVEL INTRO SCRIPT ========== -->
 
     <script>
